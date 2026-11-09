@@ -1,5 +1,6 @@
 package com.cinema.booking.dto;
 
+import com.cinema.booking.model.PaymentMethod;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -11,8 +12,7 @@ import java.util.List;
 
 /**
  * DTO Request Pemesanan Tiket dari Klien.
- * Menggantikan input form txt_nama, txt_jumlah, dan txt_pembayaran.
- * Dilengkapi validasi deklaratif Jakarta Validation.
+ * Dilengkapi validasi deklaratif Jakarta Validation dan opsi metode pembayaran (CASH/QRIS).
  */
 public record CreateBookingRequest(
     @NotBlank(message = "Nama pembeli wajib diisi")
@@ -25,6 +25,11 @@ public record CreateBookingRequest(
 
     @NotNull(message = "Jumlah pembayaran wajib dicantumkan")
     @DecimalMin(value = "0.00", inclusive = false, message = "Nominal pembayaran harus lebih dari 0")
-    BigDecimal paymentAmount
-) {}
+    BigDecimal paymentAmount,
 
+    PaymentMethod paymentMethod
+) {
+    public CreateBookingRequest(String customerName, List<String> seatCodes, BigDecimal paymentAmount) {
+        this(customerName, seatCodes, paymentAmount, PaymentMethod.CASH);
+    }
+}

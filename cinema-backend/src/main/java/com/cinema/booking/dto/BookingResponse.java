@@ -2,6 +2,7 @@ package com.cinema.booking.dto;
 
 import com.cinema.booking.model.Booking;
 import com.cinema.booking.model.BookingStatus;
+import com.cinema.booking.model.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,6 +19,8 @@ public record BookingResponse(
     BigDecimal totalAmount,
     BigDecimal paymentAmount,
     BigDecimal changeAmount,
+    PaymentMethod paymentMethod,
+    String paymentReference,
     BookingStatus status,
     Instant createdAt
 ) {
@@ -34,9 +37,10 @@ public record BookingResponse(
             booking.getTotalAmount(),
             booking.getPaymentAmount(),
             booking.getChangeAmount(),
+            booking.getPaymentMethod(),
+            booking.getPaymentReference(),
             booking.getStatus(),
             booking.getCreatedAt()
         );
     }
 }
-

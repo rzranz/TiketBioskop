@@ -10,9 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * REST Controller untuk Pemesanan dan Validasi Tiket Bioskop.
+ * REST Controller untuk Pemesanan, Pembatalan, dan Pengecekan Tiket Bioskop.
  */
 @RestController
 @RequestMapping("/api/bookings")
@@ -47,6 +48,19 @@ public class BookingController {
     }
 
     /**
+     * Membatalkan pemesanan dan mengembalikan status kursi menjadi tersedia.
+     */
+    @PostMapping("/{bookingCode}/cancel")
+    public ResponseEntity<ApiResponse<BookingResponse>> cancelBooking(
+        @PathVariable String bookingCode,
+        @RequestBody(required = false) Map<String, String> body
+    ) {
+        String reason = (body != null) ? body.get("reason") : null;
+        BookingResponse response = bookingService.cancelBooking(bookingCode, reason);
+        return ResponseEntity.ok(ApiResponse.ok("Pemesanan berhasil dibatalkan dan kursi telah dibebaskan", response));
+    }
+
+    /**
      * Mengambil seluruh riwayat pemesanan tiket di sistem.
      */
     @GetMapping
@@ -54,4 +68,3 @@ public class BookingController {
         return ResponseEntity.ok(ApiResponse.ok("Daftar riwayat pemesanan", bookingService.getAllBookings()));
     }
 }
-

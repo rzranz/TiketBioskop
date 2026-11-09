@@ -1,15 +1,20 @@
 package com.cinema.booking.model;
 
+import com.cinema.booking.exception.BusinessException;
+import com.cinema.booking.service.payment.PaymentResult;
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Entity Transaksi Pemesanan Tiket Bioskop.
- * Menggantikan variabel int total, pembayaran, dan txt_area di aplikasi lama
- * menjadi data terstruktur yang tersimpan permanen di database.
+ * Entity Agregat Pemesanan Tiket Bioskop.
+ * Menerapkan Domain-Driven Design & State Transition Explicit Behavior (Bab 5.2 Panduan .agents).
+ * Status tidak dapat diubah sembarangan via setter publik, melainkan melalui metode domain
+ * yang memvalidasi invarian bisnis secara ketat.
  */
 @Entity
 @Table(name = "bookings")
@@ -28,11 +33,18 @@ public class Booking {
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "payment_amount", nullable = false, precision = 12, scale = 2)
+    @Column(name = "payment_amount", precision = 12, scale = 2)
     private BigDecimal paymentAmount;
 
-    @Column(name = "change_amount", nullable = false, precision = 12, scale = 2)
+    @Column(name = "change_amount", precision = 12, scale = 2)
     private BigDecimal changeAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 20)
+    private PaymentMethod paymentMethod;
+
+    @Column(name = "payment_reference", length = 64)
+    private String paymentReference;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
@@ -40,6 +52,15 @@ public class Booking {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
+
+    @Column(name = "confirmed_at")
+    private Instant confirmedAt;
+
+    @Column(name = "cancelled_at")
+    private Instant cancelledAt;
+
+    @Column(name = "cancellation_reason", length = 255)
+    private String cancellationReason;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -49,21 +70,63 @@ public class Booking {
     )
     private List<Seat> seats = new ArrayList<>();
 
-    public Booking() {
+    protected Booking() {
+        // Diperlukan oleh JPA
     }
 
-    public Booking(String bookingCode, String customerName, BigDecimal totalAmount, 
-                   BigDecimal paymentAmount, BigDecimal changeAmount, List<Seat> seats) {
-        this.bookingCode = bookingCode;
-        this.customerName = customerName;
-        this.totalAmount = totalAmount;
-        this.paymentAmount = paymentAmount;
-        this.changeAmount = changeAmount;
+    /**
+     * Factory method untuk membuat entitas Booking baru dalam status PENDING.
+     */
+    public static Booking create(String bookingCode, String customerName, BigDecimal totalAmount, List<Seat> seats) {
+        Booking booking = new Booking();
+        booking.bookingCode = bookingCode;
+        booking.customerName = customerName;
+        booking.totalAmount = totalAmount;
+        booking.status = BookingStatus.PENDING;
+        booking.createdAt = Instant.now();
+        booking.seats = new ArrayList<>(seats);
+        return booking;
+    }
+
+    /**
+     * Explicit State Transition: Konfirmasi Pembayaran.
+     * Melindungi invarian: Hanya booking PENDING yang dapat dikonfirmasi.
+     */
+    public void confirmPayment(PaymentResult payment) {
+        if (this.status != BookingStatus.PENDING) {
+            throw new BusinessException(String.format(
+                "Tidak dapat mengonfirmasi pemesanan %s karena status saat ini adalah %s",
+                this.bookingCode, this.status
+            ));
+        }
+
         this.status = BookingStatus.CONFIRMED;
-        this.createdAt = Instant.now();
-        this.seats = seats;
+        this.paymentAmount = payment.amountPaid();
+        this.changeAmount = payment.changeAmount();
+        this.paymentMethod = payment.method();
+        this.paymentReference = payment.transactionReference();
+        this.confirmedAt = payment.processedAt();
     }
 
+    /**
+     * Explicit State Transition: Pembatalan Pemesanan.
+     */
+    public void cancel(String reason) {
+        if (this.status == BookingStatus.CANCELLED) {
+            throw new BusinessException("Pemesanan ini sudah dibatalkan sebelumnya.");
+        }
+
+        this.status = BookingStatus.CANCELLED;
+        this.cancellationReason = reason;
+        this.cancelledAt = Instant.now();
+
+        // Kembalikan status kursi menjadi tersedia
+        for (Seat seat : this.seats) {
+            seat.setAvailable(true);
+        }
+    }
+
+    // Getters Imutabel
     public Long getId() {
         return id;
     }
@@ -88,20 +151,35 @@ public class Booking {
         return changeAmount;
     }
 
-    public BookingStatus getStatus() {
-        return status;
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
     }
 
-    public void setStatus(BookingStatus status) {
-        this.status = status;
+    public String getPaymentReference() {
+        return paymentReference;
+    }
+
+    public BookingStatus getStatus() {
+        return status;
     }
 
     public Instant getCreatedAt() {
         return createdAt;
     }
 
+    public Instant getConfirmedAt() {
+        return confirmedAt;
+    }
+
+    public Instant getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
     public List<Seat> getSeats() {
-        return seats;
+        return Collections.unmodifiableList(seats);
     }
 }
-
