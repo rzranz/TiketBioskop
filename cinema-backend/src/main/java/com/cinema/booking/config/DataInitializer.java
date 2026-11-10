@@ -63,14 +63,14 @@ public class DataInitializer implements CommandLineRunner {
             ));
         }
 
-        // 2. Initial Movies
+        // 2. Initial Movies (Official movie posters from TMDb & Wikimedia)
         if (movieRepository.count() == 0) {
             log.info("Menginisialisasi data film bioskop...");
             List<Movie> movies = List.of(
                 new Movie(
                     "Godzilla Minus One",
-                    "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=500&q=80",
-                    "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1200&q=80",
+                    "https://image.tmdb.org/t/p/w500/hkxxMIGaiCTmrEArK7J56JTKUlB.jpg",
+                    "https://image.tmdb.org/t/p/w1280/jXJxMcVoEuXzym3vFnjqDW4ifo6.jpg",
                     "Action, Sci-Fi, Drama",
                     125,
                     "8.3/10",
@@ -82,51 +82,9 @@ public class DataInitializer implements CommandLineRunner {
                     1
                 ),
                 new Movie(
-                    "Spider-Man: No Way Home",
-                    "https://images.unsplash.com/photo-1635805737707-575885ab0820?auto=format&fit=crop&w=500&q=80",
-                    "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80",
-                    "Action, Adventure, Sci-Fi",
-                    148,
-                    "8.2/10",
-                    "93%",
-                    "13+",
-                    "Identitas Peter Parker sebagai Spider-Man terbongkar ke seluruh dunia. Bantuan Doctor Strange yang keliru justru membuka gerbang multiverse yang mempertemukan musuh-musuh legendaris.",
-                    "https://www.youtube.com/watch?v=JfVOs4VSpmA",
-                    true,
-                    null
-                ),
-                new Movie(
-                    "Sonic The Hedgehog 2",
-                    "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=500&q=80",
-                    "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80",
-                    "Animation, Action, Comedy",
-                    122,
-                    "6.5/10",
-                    "69%",
-                    "SU",
-                    "Sonic dan Tails berpacu melintasi dunia untuk menemukan zamrud Master Emerald mistis sebelum jatuh ke tangan Dr. Robotnik dan sekutu barunya, Knuckles.",
-                    "https://www.youtube.com/watch?v=47r8FXYZWNU",
-                    true,
-                    null
-                ),
-                new Movie(
-                    "Everything Everywhere All At Once",
-                    "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?auto=format&fit=crop&w=500&q=80",
-                    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
-                    "Action, Adventure, Sci-Fi",
-                    139,
-                    "7.8/10",
-                    "94%",
-                    "17+",
-                    "Seorang imigran Tionghoa paruh baya terseret ke dalam petualangan gila melintasi multisemesta di mana hanya dialah yang dapat menyelamatkan seluruh eksistensi semesta.",
-                    "https://www.youtube.com/watch?v=wxN1T1uxQ2g",
-                    true,
-                    null
-                ),
-                new Movie(
                     "Agak Laen",
-                    "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=500&q=80",
-                    "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80",
+                    "https://upload.wikimedia.org/wikipedia/en/9/91/Agak_Laen_film_poster.jpg",
+                    "https://image.tmdb.org/t/p/w1280/jXJxMcVoEuXzym3vFnjqDW4ifo6.jpg",
                     "Comedy, Horror",
                     119,
                     "8.0/10",
@@ -138,9 +96,65 @@ public class DataInitializer implements CommandLineRunner {
                     2
                 ),
                 new Movie(
+                    "Spider-Man: No Way Home",
+                    "https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
+                    "https://image.tmdb.org/t/p/w1280/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg",
+                    "Action, Adventure, Sci-Fi",
+                    148,
+                    "8.2/10",
+                    "93%",
+                    "13+",
+                    "Identitas Peter Parker sebagai Spider-Man terbongkar ke seluruh dunia. Bantuan Doctor Strange yang keliru justru membuka gerbang multiverse yang mempertemukan musuh-musuh legendaris.",
+                    "https://www.youtube.com/watch?v=JfVOs4VSpmA",
+                    true,
+                    null
+                ),
+                new Movie(
+                    "Everything Everywhere All At Once",
+                    "https://image.tmdb.org/t/p/w500/u68AjlvlutfEIcpmbYpKcdi09ut.jpg",
+                    "https://image.tmdb.org/t/p/w1280/fOy2JurzKANt6Rq7nGsgUtQBVT6.jpg",
+                    "Action, Adventure, Sci-Fi",
+                    139,
+                    "7.8/10",
+                    "94%",
+                    "17+",
+                    "Seorang imigran Tionghoa paruh baya terseret ke dalam petualangan gila melintasi multisemesta di mana hanya dialah yang dapat menyelamatkan seluruh eksistensi semesta.",
+                    "https://www.youtube.com/watch?v=wxN1T1uxQ2g",
+                    true,
+                    null
+                ),
+                new Movie(
+                    "Sonic The Hedgehog 2",
+                    "https://image.tmdb.org/t/p/w500/6DrHO1jr3qVrViUO6s6kFiAGM7.jpg",
+                    "https://image.tmdb.org/t/p/w1280/egoyMDLqCflOTTO4Pskjb1FBYdU.jpg",
+                    "Animation, Action, Comedy",
+                    122,
+                    "6.5/10",
+                    "69%",
+                    "SU",
+                    "Sonic dan Tails berpacu melintasi dunia untuk menemukan zamrud Master Emerald mistis sebelum jatuh ke tangan Dr. Robotnik dan sekutu barunya, Knuckles.",
+                    "https://www.youtube.com/watch?v=47r8FXYZWNU",
+                    true,
+                    null
+                ),
+                new Movie(
+                    "Siksa Kubur",
+                    "https://upload.wikimedia.org/wikipedia/en/2/24/Grave_Torture_2024_poster.jpg",
+                    "https://image.tmdb.org/t/p/w1280/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg",
+                    "Horror, Mystery",
+                    117,
+                    "7.4/10",
+                    "88%",
+                    "17+",
+                    "Setelah kedua orang tuanya meninggal akibat bom bunuh diri, Sita tidak lagi percaya pada agama dan bertekad mencari orang paling berdosa untuk membuktikan bahwa siksa kubur itu tidak ada.",
+                    "https://www.youtube.com/watch?v=7b77vYf9Pps",
+                    true,
+                    null
+                ),
+                new Movie(
                     "Dune: Part Two",
-                    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=500&q=80",
-                    "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80",
+                    "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+                    "https://image.tmdb.org/t/p/w1280/xOMo8BRK7PfcJv9JCnx7s520DRq.jpg",
                     "Sci-Fi, Adventure",
                     166,
                     "8.6/10",
@@ -148,6 +162,20 @@ public class DataInitializer implements CommandLineRunner {
                     "13+",
                     "Paul Atreides bersatu dengan Chani dan kaum Fremen dalam perjalanan balas dendam terhadap para konspirator yang telah meruntuhkan keluarganya.",
                     "https://www.youtube.com/watch?v=Way9Dexny3w",
+                    false,
+                    null
+                ),
+                new Movie(
+                    "Avengers: Endgame",
+                    "https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg",
+                    "https://image.tmdb.org/t/p/w1280/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg",
+                    "Action, Sci-Fi",
+                    181,
+                    "8.4/10",
+                    "94%",
+                    "13+",
+                    "Setelah peristiwa dahsyat di Avengers: Infinity War, sisa anggota Avengers berkumpul kembali demi membalikkan tindakan Thanos dan memulihkan keteraturan di alam semesta.",
+                    "https://www.youtube.com/watch?v=TcMBFSGVi1c",
                     false,
                     null
                 )

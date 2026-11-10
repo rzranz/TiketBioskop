@@ -172,7 +172,7 @@ const BookingComponent = {
       row.className = 'flex items-center justify-between p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs';
       row.innerHTML = `
         <div class="flex items-center gap-2">
-          <img src="${item.imageUrl}" onerror="handleImgError(this, '${item.name}')" class="w-8 h-8 rounded-lg object-cover bg-slate-900">
+          <img src="${item.imageUrl}" onerror="handleImgError(this)" alt="${item.name}" class="w-8 h-8 rounded-lg object-cover bg-slate-900">
           <div>
             <div class="font-bold text-slate-200">${item.name}</div>
             <div class="text-[10px] text-amber-400 font-mono">${Utils.formatRupiah(item.price)}</div>

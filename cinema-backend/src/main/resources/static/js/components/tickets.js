@@ -64,7 +64,7 @@ const TicketsComponent = {
           ${claimStatusHtml}
         </div>
         <div class="flex gap-3">
-          <img src="${posterUrl}" onerror="handleImgError(this, '${t.movieTitle}')" class="w-14 h-20 rounded-xl object-cover bg-slate-900">
+          <img src="${posterUrl}" onerror="handleImgError(this)" alt="${t.movieTitle}" class="w-14 h-20 rounded-xl object-cover bg-slate-900">
           <div class="flex-1">
             <h4 class="font-bold text-xs text-white">${t.movieTitle}</h4>
             <p class="text-[11px] text-slate-400">${t.cinemaName}</p>

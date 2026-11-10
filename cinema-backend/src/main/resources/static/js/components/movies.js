@@ -25,7 +25,7 @@ const MovieComponent = {
 
       card.innerHTML = `
         <div class="relative aspect-[2/3] overflow-hidden bg-slate-950">
-          <img src="${movie.posterUrl}" onerror="handleImgError(this, '${movie.title}')" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+          <img src="${movie.posterUrl}" onerror="handleImgError(this)" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
           ${rankBadgeHtml}
           <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-slate-950/80 backdrop-blur text-[10px] font-bold text-amber-400 border border-slate-800">
             <i class="fa-solid fa-star text-[9px]"></i> ${movie.imdbRating}
@@ -57,7 +57,7 @@ const MovieComponent = {
       item.className = 'min-w-[130px] rounded-xl overflow-hidden bg-slate-900 border border-slate-800 flex-shrink-0 cursor-pointer btn-spring';
       item.onclick = () => this.openMovieDetail(m);
       item.innerHTML = `
-        <img src="${m.posterUrl}" onerror="handleImgError(this, '${m.title}')" alt="${m.title}" class="w-full h-36 object-cover bg-slate-950">
+        <img src="${m.posterUrl}" onerror="handleImgError(this)" alt="${m.title}" class="w-full h-36 object-cover bg-slate-950">
         <div class="p-2">
           <h4 class="font-bold text-[11px] text-white truncate">${m.title}</h4>
           <span class="text-[9px] text-slate-400 block">${m.durationMinutes} min</span>

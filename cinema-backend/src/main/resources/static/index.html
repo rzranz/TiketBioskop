@@ -76,17 +76,21 @@
     <!-- TAB 1: BERANDA (HOME / MOVIES) -->
     <section id="tabHome" class="flex-1 flex flex-col p-4 gap-5">
       
-      <!-- Promo Banner Carousel -->
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-900 via-indigo-900 to-purple-900 p-4 border border-sky-500/20 shadow-lg">
-        <div class="flex justify-between items-center">
+      <!-- Promo Banner Carousel (TIX ID Style: Bank Saqu Cashback 50%) -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-700 via-indigo-800 to-slate-900 p-4 border border-sky-500/30 shadow-lg">
+        <img src="https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80" alt="Promo Cinema" class="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30">
+        <div class="relative z-10 flex justify-between items-center gap-2">
           <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider bg-rose-500 text-white px-2 py-0.5 rounded-full">Cashback 50%</span>
-            <h3 class="font-bold text-base mt-1.5 text-white">Nonton Hemat Pakai QRIS</h3>
-            <p class="text-[11px] text-slate-300">Dapatkan diskon nonton dan voucher F&B Popcorn</p>
+            <div class="flex items-center gap-1.5 mb-1">
+              <span class="text-[9px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full">bank saqu</span>
+              <span class="text-[9px] font-black uppercase tracking-wider bg-rose-500 text-white px-2 py-0.5 rounded-full">CASHBACK 50%</span>
+            </div>
+            <h3 class="font-extrabold text-sm sm:text-base text-white">Belanja Pakai QRIS Cashback 50%</h3>
+            <p class="text-[11px] text-slate-200">Praktis scan QRIS, diskon tiket &amp; voucher gratis popcorn</p>
           </div>
-          <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-3xl text-amber-400">
-            <i class="fa-solid fa-ticket-simple"></i>
-          </div>
+          <button onclick="showToast('Promo Cashback 50% QRIS otomatis diterapkan saat checkout!', 'info')" class="btn-spring px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-lg whitespace-nowrap">
+            Beli di Sini
+          </button>
         </div>
       </div>
 

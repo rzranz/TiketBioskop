@@ -59,11 +59,13 @@ const Utils = {
   /**
    * High-contrast SVG Poster Fallback generator to completely prevent broken image icons
    * @param {HTMLImageElement} img 
-   * @param {string} label 
    */
-  handleImgError(img, label = 'CineMax') {
-    const title = encodeURIComponent(label || 'Film');
+  handleImgError(img) {
+    if (!img || img.dataset.hasFailed) return;
+    img.dataset.hasFailed = "true";
     img.onerror = null; // Prevent infinite loop
+    const label = img.alt || 'CineMax Film';
+    const title = encodeURIComponent(label);
     img.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230f172a"/><stop offset="100%" stop-color="%230284c7"/></linearGradient></defs><rect width="300" height="450" fill="url(%23g)"/><circle cx="150" cy="180" r="48" fill="%2338bdf8" opacity="0.2"/><path d="M135 155 L175 180 L135 205 Z" fill="%2338bdf8"/><text x="150" y="270" fill="%23f8fafc" font-size="16" font-weight="bold" font-family="sans-serif" text-anchor="middle">${title}</text><text x="150" y="295" fill="%2394a3b8" font-size="12" font-family="sans-serif" text-anchor="middle">CineMax Premiere</text></svg>`;
   }
 };

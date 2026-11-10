@@ -109,7 +109,7 @@ const AdminComponent = {
     (AppState.movies || []).forEach(m => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="p-3"><img src="${m.posterUrl}" onerror="handleImgError(this, '${m.title}')" class="w-8 h-12 rounded object-cover"></td>
+        <td class="p-3"><img src="${m.posterUrl}" onerror="handleImgError(this)" alt="${m.title}" class="w-8 h-12 rounded object-cover"></td>
         <td class="p-3 font-bold text-white">${m.title}</td>
         <td class="p-3">${m.genre}</td>
         <td class="p-3">${m.durationMinutes} m</td>

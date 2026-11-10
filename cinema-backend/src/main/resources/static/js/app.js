@@ -114,7 +114,7 @@ const App = {
       item.className = 'flex items-center justify-between p-3 rounded-2xl bg-slate-950 border border-slate-800';
       item.innerHTML = `
         <div class="flex items-center gap-3">
-          <img src="${f.imageUrl}" onerror="handleImgError(this, '${f.name}')" class="w-16 h-16 rounded-xl object-cover shadow bg-slate-900">
+          <img src="${f.imageUrl}" onerror="handleImgError(this)" alt="${f.name}" class="w-16 h-16 rounded-xl object-cover shadow bg-slate-900">
           <div>
             <span class="text-[9px] font-bold uppercase text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">${f.category}</span>
             <h4 class="font-bold text-xs text-white mt-1">${f.name}</h4>
