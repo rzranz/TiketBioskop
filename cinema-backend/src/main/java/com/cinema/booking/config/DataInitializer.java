@@ -199,16 +199,16 @@ public class DataInitializer implements CommandLineRunner {
             cinemaRepository.saveAll(cinemas);
         }
 
-        // 4. Initial Studios & Showtimes for Bandung Cinemas
+        // 4. Initial Studios & Showtimes for All Cinemas
         if (studioRepository.count() == 0) {
             log.info("Menginisialisasi studio dan jadwal tayang bioskop...");
-            List<Cinema> bandungCinemas = cinemaRepository.findByCityIgnoreCase("BANDUNG");
+            List<Cinema> allCinemas = cinemaRepository.findAll();
             List<Movie> nowShowingMovies = movieRepository.findByNowShowingTrue();
             String today = LocalDate.now().toString();
 
             List<Showtime> allShowtimes = new ArrayList<>();
 
-            for (Cinema cinema : bandungCinemas) {
+            for (Cinema cinema : allCinemas) {
                 Studio regStudio = studioRepository.save(new Studio(cinema.getId(), "Studio 1", "REGULAR 2D", 34));
                 Studio goldStudio = studioRepository.save(new Studio(cinema.getId(), "Gold Class", "GOLD CLASS 2D", 34));
                 Studio velvetStudio = studioRepository.save(new Studio(cinema.getId(), "Velvet Suite", "VELVET 2D", 34));

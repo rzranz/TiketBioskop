@@ -40,7 +40,7 @@
         
         <!-- City Selector Dropdown -->
         <div class="relative">
-          <button onclick="toggleCityDropdown()" class="btn-spring flex items-center gap-1.5 text-xs font-bold text-slate-200 hover:text-sky-400 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/60">
+          <button id="cityDropdownBtn" onclick="toggleCityDropdown()" class="btn-spring flex items-center gap-1.5 text-xs font-bold text-slate-200 hover:text-sky-400 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/60">
             <i class="fa-solid fa-location-dot text-rose-500"></i>
             <span id="selectedCityLabel">BANDUNG</span>
             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
@@ -146,11 +146,37 @@
     <section id="tabCinemas" class="flex-1 flex flex-col p-4 gap-4 hidden">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div>
-          <h2 class="font-bold text-base text-slate-100">Daftar Bioskop &amp; Jadwal</h2>
-          <p class="text-xs text-slate-400">Kota: <span id="cinemaCityFilterLabel" class="text-sky-400 font-semibold">BANDUNG</span></p>
+          <h2 class="font-bold text-base text-slate-100 flex items-center gap-2">
+            <i class="fa-solid fa-film text-sky-400"></i> Daftar Bioskop &amp; Jadwal
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Bioskop aktif di: <span id="cinemaCityFilterLabel" class="text-sky-400 font-semibold">BANDUNG</span></p>
         </div>
+        <button onclick="App.fetchCinemas()" title="Segarkan Data Bioskop" class="btn-spring px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-sky-400 text-xs flex items-center gap-1 border border-slate-700/60">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
       </div>
-      <div id="generalCinemaList" class="flex flex-col gap-4">
+
+      <!-- Cinema Brand Filter Tabs -->
+      <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
+        <button id="cinemaPill-ALL" onclick="filterCinemaBrand('ALL')" class="cinema-brand-pill btn-spring px-3.5 py-1.5 rounded-full text-xs font-bold bg-sky-500 text-slate-950 border border-transparent">
+          Semua
+        </button>
+        <button id="cinemaPill-CGV" onclick="filterCinemaBrand('CGV')" class="cinema-brand-pill btn-spring px-3.5 py-1.5 rounded-full text-xs font-bold border border-slate-800 text-slate-400 hover:border-slate-700">
+          CGV
+        </button>
+        <button id="cinemaPill-XXI" onclick="filterCinemaBrand('XXI')" class="cinema-brand-pill btn-spring px-3.5 py-1.5 rounded-full text-xs font-bold border border-slate-800 text-slate-400 hover:border-slate-700">
+          Cinema XXI
+        </button>
+      </div>
+
+      <!-- Search in Cinema Tab -->
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-xs text-slate-500"></i>
+        <input type="text" id="cinemaSearchInput" oninput="filterCinemas(this.value)" placeholder="Cari nama bioskop atau lokasi..." class="w-full bg-slate-950/90 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition">
+      </div>
+
+      <!-- Cinema Cards List Container -->
+      <div id="generalCinemaList" class="flex flex-col gap-3.5">
         <!-- Rendered by JS -->
       </div>
     </section>
@@ -858,6 +884,7 @@
   <script src="/js/api.js"></script>
   <script src="/js/components/auth.js"></script>
   <script src="/js/components/movies.js"></script>
+  <script src="/js/components/cinemas.js"></script>
   <script src="/js/components/booking.js"></script>
   <script src="/js/components/tickets.js"></script>
   <script src="/js/components/admin.js"></script>

@@ -58,7 +58,7 @@ const App = {
   async fetchCinemas() {
     try {
       AppState.cinemas = await Api.cinemas.getAll(AppState.currentCity);
-      this.renderGeneralCinemasTab();
+      CinemaComponent.renderCinemasTab();
     } catch (e) {
       Utils.showToast('Gagal memuat daftar bioskop.', 'error');
     }
@@ -80,28 +80,6 @@ const App = {
     } catch (e) {
       console.error('Failed to load bookings:', e);
     }
-  },
-
-  renderGeneralCinemasTab() {
-    const container = document.getElementById('cinemasList');
-    if (!container) return;
-    container.innerHTML = '';
-
-    (AppState.cinemas || []).forEach(c => {
-      const item = document.createElement('div');
-      item.className = 'cinema-card p-3.5 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between shadow';
-      item.innerHTML = `
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-sky-400 border border-slate-700">${c.brand}</span>
-            <h4 class="font-bold text-xs text-white">${c.name}</h4>
-          </div>
-          <p class="text-[10px] text-slate-400 mt-1">${c.address}</p>
-        </div>
-        <button onclick="App.switchTab('home')" class="btn-spring px-3 py-1.5 rounded-lg bg-sky-500 text-slate-950 font-bold text-xs">Pilih Film</button>
-      `;
-      container.appendChild(item);
-    });
   },
 
   renderFoodTab() {
@@ -147,7 +125,7 @@ const App = {
     } else if (tab === 'cinemas') {
       document.getElementById('tabCinemas').classList.remove('hidden');
       document.getElementById('navCinemas').classList.add('text-sky-400');
-      this.renderGeneralCinemasTab();
+      CinemaComponent.renderCinemasTab();
     } else if (tab === 'tickets') {
       document.getElementById('tabTickets').classList.remove('hidden');
       document.getElementById('navTickets').classList.add('text-sky-400');
@@ -167,6 +145,9 @@ const App = {
     AppState.currentCity = city;
     const label = document.getElementById('selectedCityLabel');
     if (label) label.innerText = city;
+
+    const cinemaCityLabel = document.getElementById('cinemaCityFilterLabel');
+    if (cinemaCityLabel) cinemaCityLabel.innerText = city;
 
     const dropdown = document.getElementById('cityDropdown');
     if (dropdown) dropdown.classList.add('hidden');
@@ -215,9 +196,9 @@ window.toggleCityDropdown = () => App.toggleCityDropdown();
 window.selectCity = (city) => App.selectCity(city);
 window.filterBrand = (b) => App.filterBrand(b);
 window.handleSearch = (q) => App.handleSearch(q);
+window.fetchActiveBookings = () => App.fetchActiveBookings();
 
 // Bootstrap on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 });
-
