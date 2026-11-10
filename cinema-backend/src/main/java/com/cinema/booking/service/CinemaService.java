@@ -89,5 +89,13 @@ public class CinemaService {
     public List<Showtime> getShowtimesByMovie(Long movieId) {
         return showtimeRepository.findByMovieId(movieId);
     }
+
+    public List<Showtime> getShowtimesByCinema(Long cinemaId) {
+        return showtimeRepository.findByCinemaId(cinemaId);
+    }
+
+    public List<Showtime> getAllShowtimes() {
+        return showtimeRepository.findAll();
+    }
 }
 

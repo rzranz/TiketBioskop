@@ -32,13 +32,17 @@ public class CinemaController {
 
     @GetMapping("/showtimes")
     public ResponseEntity<ApiResponse<List<Showtime>>> getShowtimes(
-        @RequestParam Long movieId,
+        @RequestParam(required = false) Long movieId,
         @RequestParam(required = false) Long cinemaId
     ) {
-        if (cinemaId != null) {
+        if (movieId != null && cinemaId != null) {
             return ResponseEntity.ok(ApiResponse.ok(cinemaService.getShowtimesByMovieAndCinema(movieId, cinemaId)));
+        } else if (movieId != null) {
+            return ResponseEntity.ok(ApiResponse.ok(cinemaService.getShowtimesByMovie(movieId)));
+        } else if (cinemaId != null) {
+            return ResponseEntity.ok(ApiResponse.ok(cinemaService.getShowtimesByCinema(cinemaId)));
         }
-        return ResponseEntity.ok(ApiResponse.ok(cinemaService.getShowtimesByMovie(movieId)));
+        return ResponseEntity.ok(ApiResponse.ok(cinemaService.getAllShowtimes()));
     }
 
     @PostMapping
