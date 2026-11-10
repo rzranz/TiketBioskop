@@ -30,5 +30,10 @@ public class MovieService {
         return movieRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Film dengan ID " + id + " tidak ditemukan."));
     }
+
+    @Transactional
+    public Movie save(Movie movie) {
+        return movieRepository.save(movie);
+    }
 }
 

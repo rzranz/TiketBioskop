@@ -33,5 +33,11 @@ public class MovieController {
     public ResponseEntity<ApiResponse<Movie>> getMovieById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(movieService.getById(id)));
     }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<Movie>> addMovie(@RequestBody Movie movie) {
+        Movie saved = movieService.save(movie);
+        return ResponseEntity.ok(ApiResponse.ok("Film berhasil ditambahkan ke katalog!", saved));
+    }
 }
 

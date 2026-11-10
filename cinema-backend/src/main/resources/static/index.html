@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CineMax — Platform Ticketing Bioskop Modern</title>
+  <title>CineMax TIX — Platform Ticketing & CMS Bioskop Modern</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -14,7 +14,7 @@
       height: 35px;
       border-top: 5px solid #0284c7;
       border-radius: 50% 50% 0 0;
-      box-shadow: 0 -12px 25px rgba(2, 132, 199, 0.45);
+      box-shadow: 0 -12px 28px rgba(2, 132, 199, 0.45);
     }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -22,19 +22,58 @@
     /* Micro-interactions */
     @keyframes pulse-ring {
       0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.05); opacity: 0.4; }
+      50% { transform: scale(1.06); opacity: 0.35; }
       100% { transform: scale(0.95); opacity: 0.8; }
     }
-    .pulse-ring { animation: pulse-ring 2s infinite ease-in-out; }
+    .pulse-ring { animation: pulse-ring 2.2s infinite ease-in-out; }
     
     @keyframes print-paper {
-      0% { max-height: 0; opacity: 0; transform: translateY(-20px); }
-      100% { max-height: 500px; opacity: 1; transform: translateY(0); }
+      0% { max-height: 0; opacity: 0; transform: translateY(-15px); }
+      100% { max-height: 600px; opacity: 1; transform: translateY(0); }
     }
     .print-animation { animation: print-paper 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* Button Spring & Micro-animations */
+    .btn-spring {
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-spring:hover {
+      transform: translateY(-2px);
+    }
+    .btn-spring:active {
+      transform: scale(0.94);
+    }
+
+    .time-pill-btn {
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .time-pill-btn:hover {
+      transform: translateY(-2px);
+    }
+    .time-pill-btn:active {
+      transform: scale(0.92);
+    }
+    .time-pill-active {
+      background: #0284c7 !important;
+      color: #020617 !important;
+      border-color: #38bdf8 !important;
+      font-weight: 800 !important;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45);
+      transform: scale(1.05);
+    }
+
+    /* Toast Notification Animation */
+    @keyframes toast-slide {
+      0% { transform: translateY(-30px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    .toast-anim { animation: toast-slide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-start overflow-x-hidden">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-start overflow-x-hidden selection:bg-sky-500 selection:text-slate-950">
+
+  <!-- Floating Toast Notification (Modern feedback, avoids alert popup) -->
+  <div id="toastContainer" class="fixed top-5 z-[120] flex flex-col items-center gap-2 pointer-events-none"></div>
 
   <!-- Splash Screen / Micro Interaction Loader -->
   <div id="splashScreen" class="fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-center transition-opacity duration-700">
@@ -45,28 +84,27 @@
       </div>
     </div>
     <h1 class="text-2xl font-black tracking-tight text-white mb-1">CineMax <span class="text-sky-400">TIX</span></h1>
-    <p class="text-xs text-slate-400 font-medium tracking-wide">Modular Monolith Cinema Platform</p>
+    <p class="text-xs text-slate-400 font-medium tracking-wide">Modern Cinema Ticketing &amp; CMS Operations</p>
     <div class="w-48 h-1.5 bg-slate-800 rounded-full mt-6 overflow-hidden">
       <div id="splashProgress" class="h-full bg-gradient-to-r from-sky-400 to-indigo-500 w-0 transition-all duration-700 ease-out"></div>
     </div>
   </div>
 
-  <!-- App Container (Mobile Frame Simulator or Responsive View) -->
-  <div id="appViewport" class="w-full max-w-md md:max-w-xl lg:max-w-4xl min-h-screen bg-slate-900 border-x border-slate-800 shadow-2xl relative flex flex-col pb-20">
+  <!-- VIEW 1: CUSTOMER MOBILE/WEB VIEW -->
+  <div id="customerAppView" class="w-full max-w-md md:max-w-xl lg:max-w-4xl min-h-screen bg-slate-900 border-x border-slate-800 shadow-2xl relative flex flex-col pb-20">
 
-    <!-- Top Bar / Header (Inspired by Screenshot 3 & 4) -->
+    <!-- Top Bar / Header -->
     <header class="bg-slate-900/90 backdrop-blur sticky top-0 z-40 border-b border-slate-800/80 px-4 py-3">
       <div class="flex items-center justify-between gap-3">
         
         <!-- City Selector Dropdown -->
         <div class="relative">
-          <button onclick="toggleCityDropdown()" class="flex items-center gap-1.5 text-xs font-bold text-slate-200 hover:text-sky-400 transition bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/60">
+          <button onclick="toggleCityDropdown()" class="btn-spring flex items-center gap-1.5 text-xs font-bold text-slate-200 hover:text-sky-400 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/60">
             <i class="fa-solid fa-location-dot text-rose-500"></i>
             <span id="selectedCityLabel">BANDUNG</span>
             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
           </button>
           
-          <!-- Dropdown List -->
           <div id="cityDropdown" class="absolute left-0 mt-2 w-36 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl py-1 hidden z-50">
             <button onclick="selectCity('BANDUNG')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-800 font-medium">Bandung</button>
             <button onclick="selectCity('JAKARTA')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-800 font-medium">Jakarta</button>
@@ -81,13 +119,13 @@
           <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Cari film, bioskop..." class="w-full bg-slate-950/80 border border-slate-800 rounded-full pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500">
         </div>
 
-        <!-- Notification & Profile / Coins -->
+        <!-- Action Buttons: Kiosk Simulator & User/Admin Login -->
         <div class="flex items-center gap-2">
-          <button onclick="openKioskModal()" title="Simulasi Mesin Kiosk Tiket" class="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xs hover:scale-105 transition">
+          <button onclick="openKioskModal()" title="Simulasi Cetak Tiket Kiosk Mandiri" class="btn-spring w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xs">
             <i class="fa-solid fa-print"></i>
           </button>
-          <button onclick="openLoginModal()" class="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/80 rounded-full pl-2 pr-2.5 py-1 text-xs">
-            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <button onclick="openLoginModal()" class="btn-spring flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/80 rounded-full pl-2 pr-2.5 py-1 text-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span id="userCoinsLabel" class="font-bold text-amber-400 text-[11px]"><i class="fa-solid fa-coins"></i> 8.399</span>
           </button>
         </div>
@@ -97,7 +135,7 @@
     <!-- TAB 1: BERANDA (HOME / MOVIES) -->
     <section id="tabHome" class="flex-1 flex flex-col p-4 gap-5">
       
-      <!-- Promo Banner Carousel (Screenshot 3) -->
+      <!-- Promo Banner Carousel -->
       <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-900 via-indigo-900 to-purple-900 p-4 border border-sky-500/20 shadow-lg">
         <div class="flex justify-between items-center">
           <div>
@@ -114,7 +152,7 @@
       <!-- TIX VIP+ Loyalty Bar -->
       <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700/60">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-slate-950 font-black text-xs">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-slate-950 font-black text-xs shadow">
             VIP
           </div>
           <div>
@@ -122,15 +160,15 @@
             <div class="text-[10px] text-slate-400">Tukarkan 8.399 Coins dengan Tiket Gratis</div>
           </div>
         </div>
-        <button onclick="alert('Koin Anda: 8.399 Coins dapat ditukarkan di counter bioskop!')" class="text-[11px] font-bold text-sky-400 hover:underline">Tukar Hadiah &gt;</button>
+        <button onclick="showToast('Koin Anda aktif: 8.399 Coins siap ditukarkan!', 'info')" class="btn-spring text-[11px] font-bold text-sky-400 hover:underline">Tukar Hadiah &gt;</button>
       </div>
 
-      <!-- Filter Tabs (Screenshot 3) -->
+      <!-- Filter Tabs -->
       <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
-        <button onclick="filterBrand('ALL')" class="brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-500 text-slate-950 whitespace-nowrap">Semua Film</button>
-        <button onclick="filterBrand('XXI')" class="brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">Cinema XXI</button>
-        <button onclick="filterBrand('CGV')" class="brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">CGV Cinemas</button>
-        <button onclick="filterBrand('CINEPOLIS')" class="brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">Cinépolis</button>
+        <button onclick="filterBrand('ALL')" class="brand-tab btn-spring px-3.5 py-1.5 rounded-full text-xs font-semibold bg-sky-500 text-slate-950 whitespace-nowrap">Semua Film</button>
+        <button onclick="filterBrand('XXI')" class="brand-tab btn-spring px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">Cinema XXI</button>
+        <button onclick="filterBrand('CGV')" class="brand-tab btn-spring px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">CGV Cinemas</button>
+        <button onclick="filterBrand('CINEPOLIS')" class="brand-tab btn-spring px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">Cinépolis</button>
       </div>
 
       <!-- Section: Sedang Tayang (Now Showing) -->
@@ -141,8 +179,6 @@
           </h2>
           <span class="text-xs text-sky-400 font-medium cursor-pointer">Lihat Semua</span>
         </div>
-
-        <!-- Movie Card Grid / Carousel -->
         <div id="nowShowingList" class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
           <!-- Populated by JS -->
         </div>
@@ -161,103 +197,67 @@
       </div>
     </section>
 
-    <!-- TAB 2: BIOSKOP & JADWAL (SHOWTIMES - Inspired by Screenshot 4) -->
+    <!-- TAB 2: BIOSKOP & JADWAL (SHOWTIMES) -->
     <section id="tabCinemas" class="flex-1 flex flex-col p-4 gap-4 hidden">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div>
-          <h2 class="font-bold text-base text-slate-100">Pilih Bioskop & Jadwal</h2>
+          <h2 class="font-bold text-base text-slate-100">Daftar Bioskop &amp; Jadwal</h2>
           <p class="text-xs text-slate-400">Kota: <span id="cinemaCityFilterLabel" class="text-sky-400 font-semibold">BANDUNG</span></p>
         </div>
-        <div class="text-xs text-slate-400 bg-slate-800 px-2.5 py-1 rounded-md">
-          <i class="fa-solid fa-filter"></i> Filter
-        </div>
       </div>
-
-      <!-- Date Pills (Screenshot 4) -->
-      <div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
-        <button class="date-pill px-3 py-2 rounded-xl bg-sky-600 text-slate-950 font-bold text-xs flex flex-col items-center min-w-[70px]">
-          <span class="text-[10px] uppercase font-normal opacity-90">HARI INI</span>
-          <span class="text-sm font-extrabold">10 Nov</span>
-        </button>
-        <button class="date-pill px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex flex-col items-center min-w-[70px] hover:bg-slate-700">
-          <span class="text-[10px] uppercase font-normal text-slate-400">RAB</span>
-          <span class="text-sm font-extrabold">11 Nov</span>
-        </button>
-        <button class="date-pill px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex flex-col items-center min-w-[70px] hover:bg-slate-700">
-          <span class="text-[10px] uppercase font-normal text-slate-400">KAM</span>
-          <span class="text-sm font-extrabold">12 Nov</span>
-        </button>
-        <button class="date-pill px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex flex-col items-center min-w-[70px] hover:bg-slate-700">
-          <span class="text-[10px] uppercase font-normal text-slate-400">JUM</span>
-          <span class="text-sm font-extrabold">13 Nov</span>
-        </button>
-      </div>
-
-      <!-- Cinema Cards List -->
-      <div id="cinemaShowtimeContainer" class="flex flex-col gap-4">
+      <div id="generalCinemaList" class="flex flex-col gap-4">
         <!-- Rendered by JS -->
       </div>
     </section>
 
-    <!-- TAB 3: TIKET SAYA (MY TICKETS - Inspired by Screenshot 5) -->
+    <!-- TAB 3: TIKET SAYA -->
     <section id="tabTickets" class="flex-1 flex flex-col p-4 gap-4 hidden">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h2 class="font-bold text-base text-slate-100">Daftar Tiket & Pesanan</h2>
-        <button onclick="fetchActiveBookings()" class="text-xs text-sky-400 font-medium hover:underline flex items-center gap-1">
+        <h2 class="font-bold text-base text-slate-100">Daftar Tiket &amp; Pesanan</h2>
+        <button onclick="fetchActiveBookings()" class="btn-spring text-xs text-sky-400 font-medium hover:underline flex items-center gap-1">
           <i class="fa-solid fa-rotate"></i> Refresh
         </button>
       </div>
 
-      <!-- Sub Tabs: Tiket Aktif vs Riwayat -->
       <div class="flex border-b border-slate-800 text-xs font-bold text-center">
         <button class="flex-1 pb-2 border-b-2 border-sky-400 text-sky-400">TIKET AKTIF</button>
         <button class="flex-1 pb-2 text-slate-500 hover:text-slate-300">DAFTAR TRANSAKSI</button>
       </div>
 
-      <!-- Category Filter (Film, Makanan, Event) -->
-      <div class="flex gap-2">
-        <button class="px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-400 border border-sky-500/40">Film</button>
-        <button class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400">Makanan</button>
-        <button class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400">Event</button>
-      </div>
-
-      <!-- Ticket Cards List -->
       <div id="activeTicketList" class="flex flex-col gap-3 mt-1">
         <!-- Rendered by JS -->
       </div>
     </section>
 
-    <!-- TAB 4: MAKANAN & MINUMAN (F&B CONCESSIONS) -->
+    <!-- TAB 4: MAKANAN & MINUMAN -->
     <section id="tabFoods" class="flex-1 flex flex-col p-4 gap-4 hidden">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div>
-          <h2 class="font-bold text-base text-slate-100">Snack & Popcorn XXI</h2>
+          <h2 class="font-bold text-base text-slate-100">Snack &amp; Popcorn XXI</h2>
           <p class="text-xs text-slate-400">Pesan makanan lebih awal, ambil tanpa antre di counter</p>
         </div>
       </div>
-
-      <!-- Food Items List -->
       <div id="foodList" class="grid grid-cols-1 gap-3">
         <!-- Rendered by JS -->
       </div>
     </section>
 
-    <!-- Bottom Navigation Bar (Screenshot 3 & 5) -->
+    <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
       <div class="w-full max-w-md md:max-w-xl lg:max-w-4xl bg-slate-900/95 backdrop-blur border-t border-slate-800 flex justify-around items-center py-2 px-3">
-        <button onclick="switchTab('home')" id="navHome" class="nav-btn flex flex-col items-center gap-1 text-sky-400">
+        <button onclick="switchTab('home')" id="navHome" class="nav-btn btn-spring flex flex-col items-center gap-1 text-sky-400">
           <i class="fa-solid fa-house text-base"></i>
           <span class="text-[10px] font-bold">Beranda</span>
         </button>
-        <button onclick="switchTab('cinemas')" id="navCinemas" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
+        <button onclick="switchTab('cinemas')" id="navCinemas" class="nav-btn btn-spring flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
           <i class="fa-solid fa-film text-base"></i>
           <span class="text-[10px] font-bold">Bioskop</span>
         </button>
-        <button onclick="switchTab('foods')" id="navFoods" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
+        <button onclick="switchTab('foods')" id="navFoods" class="nav-btn btn-spring flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
           <i class="fa-solid fa-burger text-base"></i>
           <span class="text-[10px] font-bold">Makanan</span>
         </button>
-        <button onclick="switchTab('tickets')" id="navTickets" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
+        <button onclick="switchTab('tickets')" id="navTickets" class="nav-btn btn-spring flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
           <i class="fa-solid fa-ticket text-base"></i>
           <span class="text-[10px] font-bold">Tiket Saya</span>
         </button>
@@ -265,24 +265,255 @@
     </nav>
   </div>
 
-  <!-- MODAL 1: PREVIEW FILM & SINOPSIS (Screenshot 1 & 2) -->
-  <div id="movieDetailModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all">
-    <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto hide-scrollbar shadow-2xl relative">
+  <!-- VIEW 2: ADMIN CMS DASHBOARD (Dedicated Admin View requested by user) -->
+  <div id="adminAppView" class="w-full max-w-5xl min-h-screen bg-slate-900 border-x border-slate-800 shadow-2xl p-6 hidden flex flex-col gap-6">
+    
+    <!-- Admin Header -->
+    <div class="flex flex-wrap items-center justify-between pb-4 border-b border-slate-800 gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center text-white text-xl shadow-lg shadow-amber-500/20">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-black text-white">CineMax Admin Backoffice</h1>
+            <span class="bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Ops Manager</span>
+          </div>
+          <p class="text-xs text-slate-400">Kelola Katalog Film, Bioskop, Studio, dan Jadwal Tayang</p>
+        </div>
+      </div>
+      <button onclick="switchBackToCustomerApp()" class="btn-spring px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Kembali ke Tampilan Pengguna
+      </button>
+    </div>
+
+    <!-- Admin Navigation Tabs -->
+    <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+      <button onclick="switchAdminTab('movies')" id="adminTabBtnMovies" class="admin-tab-btn btn-spring px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 text-slate-950">
+        <i class="fa-solid fa-film mr-1.5"></i> Kelola Film
+      </button>
+      <button onclick="switchAdminTab('cinemas')" id="adminTabBtnCinemas" class="admin-tab-btn btn-spring px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
+        <i class="fa-solid fa-building mr-1.5"></i> Kelola Bioskop &amp; Studio
+      </button>
+      <button onclick="switchAdminTab('showtimes')" id="adminTabBtnShowtimes" class="admin-tab-btn btn-spring px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
+        <i class="fa-solid fa-clock mr-1.5"></i> Jadwal &amp; Kursi Studio
+      </button>
+      <button onclick="switchAdminTab('sales')" id="adminTabBtnSales" class="admin-tab-btn btn-spring px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700">
+        <i class="fa-solid fa-chart-line mr-1.5"></i> Laporan Transaksi
+      </button>
+    </div>
+
+    <!-- ADMIN SUB-TAB 1: KELOLA FILM -->
+    <div id="adminTabMovies" class="space-y-6">
+      <!-- Add Movie Form -->
+      <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+        <h3 class="font-bold text-sm text-sky-400 flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle"></i> Tambah Film Baru ke Katalog
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Judul Film *</label>
+            <input type="text" id="adminMovieTitle" placeholder="Contoh: Oppenheimer" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Genre *</label>
+            <input type="text" id="adminMovieGenre" placeholder="Drama, History, Thriller" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Durasi (Menit) *</label>
+            <input type="number" id="adminMovieDuration" placeholder="180" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Rating IMDb</label>
+            <input type="text" id="adminMovieImdb" placeholder="8.9/10" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Usia &amp; Status</label>
+            <select id="adminMovieAge" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+              <option value="13+">13+ (Remaja)</option>
+              <option value="17+">17+ (Dewasa)</option>
+              <option value="SU">SU (Semua Umur)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">URL Poster Gambar *</label>
+            <input type="text" id="adminMoviePoster" placeholder="https://images.unsplash.com/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div class="md:col-span-3">
+            <label class="block text-slate-400 mb-1">Sinopsis Ringkas</label>
+            <textarea id="adminMovieSynopsis" rows="2" placeholder="Tuliskan cerita film..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white"></textarea>
+          </div>
+        </div>
+        <button onclick="submitNewMovie()" class="btn-spring px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center gap-2">
+          <i class="fa-solid fa-save"></i> Simpan Film ke Database
+        </button>
+      </div>
+
+      <!-- Current Movies List Table -->
+      <div>
+        <h4 class="font-bold text-xs text-slate-300 uppercase tracking-wider mb-2">Film Terdaftar di Database</h4>
+        <div class="overflow-x-auto rounded-2xl border border-slate-800">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="p-3">Poster</th>
+                <th class="p-3">Judul</th>
+                <th class="p-3">Genre</th>
+                <th class="p-3">Durasi</th>
+                <th class="p-3">Rating</th>
+                <th class="p-3">Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminMovieTableBody" class="divide-y divide-slate-800 bg-slate-900">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN SUB-TAB 2: KELOLA BIOSKOP & STUDIO -->
+    <div id="adminTabCinemas" class="space-y-6 hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Add Cinema Form -->
+        <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+          <h3 class="font-bold text-sm text-sky-400 flex items-center gap-2">
+            <i class="fa-solid fa-plus-circle"></i> Tambah Bioskop Baru
+          </h3>
+          <div class="space-y-2 text-xs">
+            <div>
+              <label class="block text-slate-400 mb-1">Nama Bioskop *</label>
+              <input type="text" id="adminCinemaName" placeholder="Contoh: Trans Studio Mall XXI" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Kota *</label>
+              <select id="adminCinemaCity" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                <option value="BANDUNG">Bandung</option>
+                <option value="JAKARTA">Jakarta</option>
+                <option value="SURABAYA">Surabaya</option>
+                <option value="YOGYAKARTA">Yogyakarta</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Brand Waralaba</label>
+              <select id="adminCinemaBrand" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                <option value="CGV">CGV Cinemas</option>
+                <option value="XXI">Cinema XXI</option>
+                <option value="CINEPOLIS">Cinépolis</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Alamat Lengkap</label>
+              <input type="text" id="adminCinemaAddress" placeholder="Jl. Gatot Subroto No. 289" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+            </div>
+          </div>
+          <button onclick="submitNewCinema()" class="btn-spring px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 mt-2">
+            <i class="fa-solid fa-save"></i> Tambah Bioskop
+          </button>
+        </div>
+
+        <!-- Add Studio Form -->
+        <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+          <h3 class="font-bold text-sm text-amber-400 flex items-center gap-2">
+            <i class="fa-solid fa-door-open"></i> Tambah Studio ke Bioskop
+          </h3>
+          <div class="space-y-2 text-xs">
+            <div>
+              <label class="block text-slate-400 mb-1">Pilih Bioskop *</label>
+              <select id="adminStudioCinemaSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Nama Studio *</label>
+              <input type="text" id="adminStudioName" placeholder="Contoh: Studio 2 / Premiere Hall" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Tipe Studio *</label>
+              <select id="adminStudioType" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                <option value="REGULAR 2D">REGULAR 2D</option>
+                <option value="GOLD CLASS 2D">GOLD CLASS 2D</option>
+                <option value="VELVET 2D">VELVET 2D</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="submitNewStudio()" class="btn-spring px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 mt-2">
+            <i class="fa-solid fa-save"></i> Tambah Studio
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN SUB-TAB 3: JADWAL & KURSI -->
+    <div id="adminTabShowtimes" class="space-y-6 hidden">
+      <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+        <h3 class="font-bold text-sm text-sky-400 flex items-center gap-2">
+          <i class="fa-solid fa-calendar-plus"></i> Tambah Jadwal Tayang Film &amp; Generate Kursi Otomatis
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Pilih Film *</label>
+            <select id="adminStMovieSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Pilih Bioskop *</label>
+            <select id="adminStCinemaSelect" onchange="loadStudiosForAdminShowtime(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Pilih Studio *</label>
+            <select id="adminStStudioSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Tanggal Tayang *</label>
+            <input type="date" id="adminStDate" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Jam Tayang (HH:mm) *</label>
+            <input type="text" id="adminStTime" placeholder="19:30" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Harga Tiket (Rp) *</label>
+            <input type="number" id="adminStPrice" placeholder="50000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+          </div>
+        </div>
+        <button onclick="submitNewShowtime()" class="btn-spring px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center gap-2">
+          <i class="fa-solid fa-magic"></i> Simpan Jadwal &amp; Siapkan Denah Kursi
+        </button>
+      </div>
+    </div>
+
+    <!-- ADMIN SUB-TAB 4: LAPORAN PENJUALAN -->
+    <div id="adminTabSales" class="space-y-6 hidden">
+      <div id="adminSalesContainer" class="space-y-4">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 1: PREVIEW FILM & JADWAL LANGSUNG (Sesuai Permintaan Spesifik User!) -->
+  <div id="movieDetailModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto hide-scrollbar shadow-2xl relative">
       
       <!-- Backdrop Image -->
-      <div class="relative h-56 w-full overflow-hidden">
-        <img id="detailBackdrop" src="" alt="Backdrop" class="w-full h-full object-cover">
+      <div class="relative h-48 w-full overflow-hidden bg-slate-950">
+        <img id="detailBackdrop" src="" onerror="handleImgError(this)" alt="Backdrop" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-        <button onclick="closeMovieDetail()" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-950/70 border border-slate-700 text-white flex items-center justify-center text-sm">
+        <button onclick="closeMovieDetail()" class="btn-spring absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-950/70 border border-slate-700 text-white flex items-center justify-center text-sm shadow">
           <i class="fa-solid fa-chevron-left"></i>
         </button>
       </div>
 
       <div class="p-5 -mt-8 relative z-10">
         <div class="flex gap-4">
-          <img id="detailPoster" src="" alt="Poster" class="w-24 h-36 rounded-xl object-cover shadow-2xl border border-slate-700 flex-shrink-0 -mt-10">
+          <img id="detailPoster" src="" onerror="handleImgError(this)" alt="Poster" class="w-24 h-36 rounded-xl object-cover shadow-2xl border border-slate-700 flex-shrink-0 -mt-10 bg-slate-950">
           <div class="flex-1">
-            <span id="detailBadge" class="text-[10px] font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md uppercase">TOP 1</span>
+            <span id="detailBadge" class="text-[10px] font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md uppercase">NOW SHOWING</span>
             <h2 id="detailTitle" class="text-lg font-black text-white mt-1 leading-snug">Movie Title</h2>
             <div id="detailGenre" class="text-xs text-sky-400 font-medium mt-0.5">Action, Sci-Fi</div>
             <div class="flex items-center gap-2 mt-2 text-[11px] text-slate-300">
@@ -292,7 +523,7 @@
           </div>
         </div>
 
-        <!-- Rating Badges (Screenshot 1) -->
+        <!-- Rating Badges -->
         <div class="grid grid-cols-3 gap-2 my-4 p-3 rounded-2xl bg-slate-950/80 border border-slate-800/90 text-center">
           <div>
             <div class="text-[10px] text-slate-400 font-semibold">IMDb</div>
@@ -308,32 +539,63 @@
           </div>
         </div>
 
-        <!-- Synopsis -->
+        <!-- Synopsis Accordion -->
         <div>
           <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Sinopsis</h4>
-          <p id="detailSynopsis" class="text-xs text-slate-400 leading-relaxed">Synopsis description...</p>
+          <p id="detailSynopsis" class="text-xs text-slate-400 leading-relaxed">Synopsis...</p>
         </div>
 
-        <!-- Action CTA -->
-        <div class="mt-6 pt-3 border-t border-slate-800 flex gap-3">
-          <button id="btnWatchTrailer" onclick="watchTrailer()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1.5">
+        <!-- DIRECT SHOWTIME SELECTION INSIDE MOVIE (Permintaan Inti Pengguna!) -->
+        <div class="mt-6 pt-4 border-t border-slate-800 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-extrabold text-white flex items-center gap-1.5 uppercase tracking-wide">
+              <i class="fa-solid fa-clock text-sky-400"></i> Pilih Bioskop &amp; Jam Tayang
+            </h4>
+            <span class="text-[10px] text-sky-400 font-medium">Kota: <b id="detailMovieCityLabel">BANDUNG</b></span>
+          </div>
+
+          <!-- Date Pills inside Movie Detail -->
+          <div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
+            <button class="btn-spring px-3 py-1.5 rounded-xl bg-sky-600 text-slate-950 font-bold text-xs flex flex-col items-center min-w-[65px]">
+              <span class="text-[9px] uppercase font-normal opacity-90">HARI INI</span>
+              <span class="text-xs font-black">10 Nov</span>
+            </button>
+            <button class="btn-spring px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex flex-col items-center min-w-[65px] hover:bg-slate-700">
+              <span class="text-[9px] uppercase font-normal text-slate-400">RAB</span>
+              <span class="text-xs font-black">11 Nov</span>
+            </button>
+            <button class="btn-spring px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex flex-col items-center min-w-[65px] hover:bg-slate-700">
+              <span class="text-[9px] uppercase font-normal text-slate-400">KAM</span>
+              <span class="text-xs font-black">12 Nov</span>
+            </button>
+          </div>
+
+          <!-- Cinemas & Showtimes Accordion Container -->
+          <div id="movieDirectShowtimesContainer" class="space-y-3">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Action CTA: Disabled until user chooses a showtime! -->
+        <div class="sticky bottom-0 bg-slate-900 pt-3 pb-1 border-t border-slate-800 mt-4 flex gap-2">
+          <button onclick="watchTrailer()" class="btn-spring px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1.5">
             <i class="fa-solid fa-play text-rose-500"></i> Trailer
           </button>
-          <button onclick="goToScheduleFromMovie()" class="flex-1 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-sky-500/20">
-            <i class="fa-solid fa-ticket"></i> Beli Tiket Nonton
+          <button id="btnProceedToSeatFromMovie" onclick="proceedToSeatSelection()" disabled class="flex-1 py-3 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-not-allowed">
+            <i class="fa-solid fa-ticket"></i> <span id="btnProceedText">Pilih Jam Tayang Terlebih Dahulu</span>
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 2: SEAT SELECTION & SEAT HOLD WITH COUNTDOWN (Screenshot 1) -->
+  <!-- MODAL 2: SEAT SELECTION & SEAT HOLD WITH COUNTDOWN -->
   <div id="seatModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col justify-between p-4 overflow-y-auto hide-scrollbar">
     <div class="max-w-md w-full mx-auto">
       
       <!-- Seat Header -->
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <button onclick="closeSeatModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
+        <button onclick="closeSeatModal()" class="btn-spring w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
           <i class="fa-solid fa-arrow-left"></i>
         </button>
         <div class="text-center">
@@ -356,7 +618,7 @@
           <span>Tersedia</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <div class="w-4 h-4 rounded bg-amber-500"></div>
+          <div class="w-4 h-4 rounded bg-amber-500 shadow-sm shadow-amber-500/50"></div>
           <span>Pilihan Anda</span>
         </div>
         <div class="flex items-center gap-1.5">
@@ -387,7 +649,7 @@
           <span id="selectedSeatsTotal" class="font-bold text-amber-400 font-mono">Rp 0</span>
         </div>
       </div>
-      <button id="btnProceedToCheckout" onclick="proceedToCheckoutWithHold()" class="w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
+      <button id="btnProceedToCheckout" onclick="proceedToCheckoutWithHold()" class="btn-spring w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
         <i class="fa-solid fa-lock"></i> Kunci Kursi &amp; Lanjut Pembayaran
       </button>
     </div>
@@ -399,7 +661,7 @@
       
       <!-- Checkout Header with TTL Countdown Timer -->
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <button onclick="closeCheckoutModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
+        <button onclick="closeCheckoutModal()" class="btn-spring w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
           <i class="fa-solid fa-xmark"></i>
         </button>
         <div class="text-center">
@@ -474,7 +736,7 @@
             <span class="text-[11px] text-slate-400">Total Pembayaran:</span>
             <div id="checkoutGrandTotal" class="text-lg font-black text-amber-400 font-mono">Rp 90.000</div>
           </div>
-          <button onclick="executePayment()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
+          <button onclick="executePayment()" class="btn-spring px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
             <i class="fa-solid fa-check"></i> Bayar Sekarang
           </button>
         </div>
@@ -482,7 +744,7 @@
     </div>
   </div>
 
-  <!-- MODAL 4: DIGITAL TICKET & PICKUP CODE MODAL (Screenshot 5) -->
+  <!-- MODAL 4: DIGITAL TICKET & PICKUP CODE MODAL -->
   <div id="ticketDetailModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative print-animation">
       
@@ -517,7 +779,7 @@
           <span id="ticketFnb" class="font-semibold text-amber-300 text-right">Popcorn Caramel x1</span>
         </div>
         
-        <!-- Random PIN / Claim Code (Requested by user) -->
+        <!-- Random PIN / Claim Code -->
         <div class="pt-2 border-t border-dashed border-slate-800 flex flex-col items-center justify-center bg-slate-900/60 p-3 rounded-xl mt-2">
           <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">PIN / Kode Klaim Kiosk</span>
           <span id="ticketClaimCode" class="text-xl font-black font-mono tracking-widest text-amber-400 my-1">CLM-492182</span>
@@ -535,10 +797,10 @@
       </div>
 
       <div class="flex gap-2">
-        <button onclick="openKioskWithCode()" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5">
+        <button onclick="openKioskWithCode()" class="btn-spring flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-print"></i> Simulasi Cetak Kiosk
         </button>
-        <button onclick="closeTicketDetailModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold">
+        <button onclick="closeTicketDetailModal()" class="btn-spring px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold">
           Tutup
         </button>
       </div>
@@ -561,7 +823,7 @@
           <input type="text" id="kioskCodeInput" placeholder="Contoh: CLM-492182" class="w-full text-center tracking-widest font-mono font-black text-base bg-slate-950 border-2 border-slate-700 rounded-xl py-3 text-amber-400 focus:outline-none focus:border-amber-500 uppercase">
         </div>
         
-        <button onclick="submitKioskClaim()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2">
+        <button onclick="submitKioskClaim()" class="btn-spring w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2">
           <i class="fa-solid fa-print text-sm"></i> Cetak Tiket Fisik
         </button>
 
@@ -582,8 +844,66 @@
         </div>
       </div>
 
-      <button onclick="closeKioskModal()" class="w-full py-2 rounded-xl bg-slate-800 text-xs font-semibold mt-2">
+      <button onclick="closeKioskModal()" class="btn-spring w-full py-2 rounded-xl bg-slate-800 text-xs font-semibold mt-2">
         Tutup Kiosk
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 6: LOGIN MODAL (SWITCH USER VS ADMIN CMS) -->
+  <div id="loginModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
+      
+      <div class="text-center pb-4 border-b border-slate-800">
+        <h3 class="font-extrabold text-base text-white">Pintu Masuk Akun</h3>
+        <p class="text-[11px] text-slate-400 mt-0.5">Pilih login sebagai Pengguna atau Administrator</p>
+      </div>
+
+      <!-- Login Role Selector Tabs -->
+      <div class="grid grid-cols-2 gap-2 my-4 p-1 bg-slate-950 rounded-xl border border-slate-800 text-xs">
+        <button onclick="switchLoginRole('user')" id="roleBtnUser" class="py-2 rounded-lg font-bold bg-sky-500 text-slate-950 transition">
+          <i class="fa-solid fa-user mr-1"></i> Pelanggan
+        </button>
+        <button onclick="switchLoginRole('admin')" id="roleBtnAdmin" class="py-2 rounded-lg font-bold text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-shield-halved mr-1"></i> Admin CMS
+        </button>
+      </div>
+
+      <!-- User Login Form -->
+      <div id="formUserLogin" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Nama Lengkap</label>
+          <input type="text" id="loginCustName" value="Randi Pratama" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Email Terdaftar</label>
+          <input type="email" id="loginCustEmail" value="randi@tixid.example.com" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white">
+        </div>
+        <button onclick="submitUserLogin()" class="btn-spring w-full py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs mt-2">
+          Masuk sebagai Pelanggan
+        </button>
+      </div>
+
+      <!-- Admin Login Form -->
+      <div id="formAdminLogin" class="space-y-3 text-xs hidden">
+        <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300">
+          <i class="fa-solid fa-info-circle"></i> Gunakan akun pengelola untuk menambah film, bioskop, studio &amp; jadwal tayang.
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Email Administrator</label>
+          <input type="email" id="loginAdminEmail" value="admin@cinemax.id" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Kata Sandi</label>
+          <input type="password" id="loginAdminPassword" value="admin123" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white">
+        </div>
+        <button onclick="submitAdminLogin()" class="btn-spring w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-slate-950 font-black text-xs uppercase tracking-wider mt-2">
+          Masuk ke Dashboard Admin
+        </button>
+      </div>
+
+      <button onclick="closeLoginModal()" class="btn-spring w-full py-2 rounded-xl bg-slate-800 text-xs font-semibold mt-3">
+        Tutup
       </button>
     </div>
   </div>
@@ -600,11 +920,45 @@
     
     // Active Selection State
     let selectedMovie = null;
-    let selectedShowtime = null;
+    let selectedShowtime = null; // showtime selected inside movie detail!
     let selectedSeats = new Map(); // seatCode -> price
     let selectedFnb = new Map(); // foodId -> qty
     let currentHoldTimerInterval = null;
     let currentClaimedTicket = null;
+
+    // Toast Notification Function
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      let bg = 'bg-emerald-500/90 text-slate-950 border-emerald-400';
+      let icon = 'fa-circle-check';
+      if (type === 'error') {
+        bg = 'bg-rose-500/90 text-white border-rose-400';
+        icon = 'fa-triangle-exclamation';
+      } else if (type === 'info') {
+        bg = 'bg-sky-500/90 text-slate-950 border-sky-400';
+        icon = 'fa-circle-info';
+      }
+
+      toast.className = `toast-anim px-4 py-2.5 rounded-2xl shadow-2xl border text-xs font-bold flex items-center gap-2 backdrop-blur ${bg}`;
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.transition = 'all 0.4s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 400);
+      }, 3000);
+    }
+
+    // Fallback Image Handler (Never lets an image be broken)
+    function handleImgError(img) {
+      img.onerror = null;
+      // High-res unblocked cinema fallback poster
+      img.src = 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=80';
+    }
 
     // 1. Initial Load & Micro-interaction Loader
     window.addEventListener('DOMContentLoaded', async () => {
@@ -652,7 +1006,7 @@
         const json = await res.json();
         if (json.success) {
           cinemas = json.data;
-          renderCinemaShowtimes();
+          renderGeneralCinemasTab();
         }
       } catch (e) {
         console.error("Gagal load bioskop", e);
@@ -685,19 +1039,19 @@
       }
     }
 
-    // 3. Render Now Showing Movies (Screenshot 1 & 3)
+    // 3. Render Now Showing Movies
     function renderNowShowing() {
       const container = document.getElementById('nowShowingList');
       container.innerHTML = '';
 
       movies.forEach(movie => {
         const card = document.createElement('div');
-        card.className = 'group cursor-pointer rounded-2xl bg-slate-900 border border-slate-800 hover:border-sky-500/50 transition overflow-hidden shadow-lg';
+        card.className = 'group cursor-pointer rounded-2xl bg-slate-900 border border-slate-800 hover:border-sky-500/50 btn-spring overflow-hidden shadow-lg';
         card.onclick = () => openMovieDetail(movie);
 
         card.innerHTML = `
           <div class="relative aspect-[2/3] overflow-hidden bg-slate-950">
-            <img src="${movie.posterUrl}" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            <img src="${movie.posterUrl}" onerror="handleImgError(this)" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
             ${movie.rankBadge ? `<div class="absolute top-2 left-2 w-6 h-6 rounded-full bg-slate-950/80 backdrop-blur border border-amber-400 text-amber-400 font-black text-[11px] flex items-center justify-center">${movie.rankBadge}</div>` : ''}
             <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-slate-950/80 backdrop-blur text-[10px] font-bold text-amber-400 border border-slate-800">
               <i class="fa-solid fa-star text-[9px]"></i> ${movie.imdbRating}
@@ -721,10 +1075,10 @@
 
       comingMovies.forEach(m => {
         const item = document.createElement('div');
-        item.className = 'min-w-[130px] rounded-xl overflow-hidden bg-slate-900 border border-slate-800 flex-shrink-0 cursor-pointer';
+        item.className = 'min-w-[130px] rounded-xl overflow-hidden bg-slate-900 border border-slate-800 flex-shrink-0 cursor-pointer btn-spring';
         item.onclick = () => openMovieDetail(m);
         item.innerHTML = `
-          <img src="${m.posterUrl}" alt="${m.title}" class="w-full h-36 object-cover">
+          <img src="${m.posterUrl}" onerror="handleImgError(this)" alt="${m.title}" class="w-full h-36 object-cover bg-slate-950">
           <div class="p-2">
             <h4 class="font-bold text-[11px] text-white truncate">${m.title}</h4>
             <span class="text-[9px] text-slate-400 block">${m.durationMinutes} min</span>
@@ -734,9 +1088,11 @@
       });
     }
 
-    // 4. Movie Detail View (Screenshot 1 & 2)
-    function openMovieDetail(movie) {
+    // 4. Movie Detail View WITH DIRECT SHOWTIMES & STUDIOS
+    async function openMovieDetail(movie) {
       selectedMovie = movie;
+      selectedShowtime = null; // reset showtime
+
       document.getElementById('detailTitle').innerText = movie.title;
       document.getElementById('detailGenre').innerText = movie.genre;
       document.getElementById('detailAge').innerText = movie.ageRating;
@@ -747,8 +1103,137 @@
       document.getElementById('detailPoster').src = movie.posterUrl;
       document.getElementById('detailBackdrop').src = movie.backdropUrl || movie.posterUrl;
       document.getElementById('detailBadge').innerText = movie.rankBadge ? `TOP #${movie.rankBadge}` : 'NOW SHOWING';
-      
+      document.getElementById('detailMovieCityLabel').innerText = currentCity;
+
+      // Reset Proceed Button
+      const btn = document.getElementById('btnProceedToSeatFromMovie');
+      btn.disabled = true;
+      btn.className = 'flex-1 py-3 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-not-allowed';
+      document.getElementById('btnProceedText').innerText = 'Pilih Jam Tayang Terlebih Dahulu';
+
+      // Load Cinemas & Showtimes DIRECTLY inside this Movie Detail!
+      await renderMovieDirectShowtimes(movie.id);
+
       document.getElementById('movieDetailModal').classList.remove('hidden');
+    }
+
+    async function renderMovieDirectShowtimes(movieId) {
+      const container = document.getElementById('movieDirectShowtimesContainer');
+      container.innerHTML = '<div class="text-xs text-slate-400 animate-pulse py-2">Memuat jadwal bioskop di kota ' + currentCity + '...</div>';
+
+      try {
+        const res = await fetch(`/api/cinemas/showtimes?movieId=${movieId}`);
+        const json = await res.json();
+        const allShowtimes = json.data || [];
+
+        // Filter showtimes matching current city cinemas
+        const cityCinemaIds = cinemas.map(c => c.id);
+        const filteredShowtimes = allShowtimes.filter(st => cityCinemaIds.includes(st.cinemaId));
+
+        if (filteredShowtimes.length === 0) {
+          container.innerHTML = `
+            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-center text-xs text-slate-400">
+              <i class="fa-solid fa-calendar-xmark text-slate-500 text-lg mb-1 block"></i>
+              Jadwal belum dibuka di bioskop kota ${currentCity}. Coba pilih kota lain atau cek jadwal besok.
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = '';
+
+        // Group showtimes by cinema
+        cinemas.forEach(cinema => {
+          const cinemaShowtimes = filteredShowtimes.filter(st => st.cinemaId === cinema.id);
+          if (cinemaShowtimes.length === 0) return;
+
+          const card = document.createElement('div');
+          card.className = 'p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5';
+
+          // Group by studio type
+          const studioGroups = {};
+          cinemaShowtimes.forEach(st => {
+            if (!studioGroups[st.studioType]) studioGroups[st.studioType] = [];
+            studioGroups[st.studioType].push(st);
+          });
+
+          let studiosHtml = '';
+          for (const type of Object.keys(studioGroups)) {
+            const list = studioGroups[type];
+            const price = Number(list[0].price).toLocaleString('id-ID');
+
+            studiosHtml += `
+              <div class="pt-2 border-t border-slate-800/60">
+                <div class="flex justify-between items-center text-[11px] mb-1.5">
+                  <span class="font-bold text-slate-300">${type}</span>
+                  <span class="font-mono text-slate-400 text-[10px]">Rp ${price}</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  ${list.map(st => `
+                    <button id="timeBtn-${st.id}" onclick="selectDirectShowtime(${st.id}, '${cinema.name}', '${type}', '${st.startTime}', ${st.price})" class="time-pill-btn px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 font-mono text-xs font-bold text-slate-200">
+                      ${st.startTime}
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }
+
+          card.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <h5 class="font-bold text-xs text-white">${cinema.name}</h5>
+                <p class="text-[10px] text-slate-400">${cinema.address}</p>
+              </div>
+              <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-800 text-sky-400 border border-slate-700">${cinema.brand}</span>
+            </div>
+            ${studiosHtml}
+          `;
+          container.appendChild(card);
+        });
+
+      } catch (e) {
+        container.innerHTML = '<div class="text-xs text-rose-400">Gagal memuat jadwal tayang.</div>';
+      }
+    }
+
+    // When User Clicks a Time Pill inside Movie Detail:
+    function selectDirectShowtime(showtimeId, cinemaName, studioType, startTime, price) {
+      // Remove active class from all time pills
+      document.querySelectorAll('.time-pill-btn').forEach(btn => btn.classList.remove('time-pill-active'));
+
+      // Highlight selected time pill with spring micro-interaction
+      const activeBtn = document.getElementById(`timeBtn-${showtimeId}`);
+      if (activeBtn) activeBtn.classList.add('time-pill-active');
+
+      selectedShowtime = {
+        id: showtimeId,
+        movieTitle: selectedMovie.title,
+        cinemaName: cinemaName,
+        studioType: studioType,
+        startTime: startTime,
+        price: price
+      };
+
+      // Activate the bottom button!
+      const btn = document.getElementById('btnProceedToSeatFromMovie');
+      btn.disabled = false;
+      btn.className = 'btn-spring flex-1 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-sky-500/25 cursor-pointer';
+      document.getElementById('btnProceedText').innerText = `Pesan Tiket • ${startTime} (${studioType})`;
+
+      showToast(`Jadwal ${startTime} di ${cinemaName} dipilih!`, 'info');
+    }
+
+    function proceedToSeatSelection() {
+      if (!selectedShowtime) return;
+      closeMovieDetail();
+      openSeatSelection(
+        selectedShowtime.id, 
+        selectedShowtime.movieTitle, 
+        selectedShowtime.cinemaName, 
+        selectedShowtime.studioType, 
+        selectedShowtime.startTime
+      );
     }
 
     function closeMovieDetail() {
@@ -761,76 +1246,27 @@
       }
     }
 
-    function goToScheduleFromMovie() {
-      closeMovieDetail();
-      switchTab('cinemas');
-    }
-
-    // 5. Cinema & Showtimes (Screenshot 4)
-    async function renderCinemaShowtimes() {
-      const container = document.getElementById('cinemaShowtimeContainer');
+    // 5. General Cinemas Tab List
+    function renderGeneralCinemasTab() {
+      const container = document.getElementById('generalCinemaList');
+      if (!container) return;
       container.innerHTML = '';
 
-      // Default pick movie 1 if none chosen
-      const activeMovie = selectedMovie || movies[0];
-      if (!activeMovie) return;
-
-      for (const cinema of cinemas) {
-        // Fetch showtimes for this cinema & movie
-        const res = await fetch(`/api/cinemas/showtimes?movieId=${activeMovie.id}&cinemaId=${cinema.id}`);
-        const json = await res.json();
-        const showtimes = json.data || [];
-
-        const card = document.createElement('div');
-        card.className = 'p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3';
-
-        // Group showtimes by studio type
-        const studioGroups = {};
-        showtimes.forEach(st => {
-          if (!studioGroups[st.studioType]) studioGroups[st.studioType] = [];
-          studioGroups[st.studioType].push(st);
-        });
-
-        let studiosHtml = '';
-        if (Object.keys(studioGroups).length === 0) {
-          studiosHtml = `<div class="text-xs text-slate-500 py-1">Jadwal hari ini belum tersedia di bioskop ini.</div>`;
-        } else {
-          for (const type of Object.keys(studioGroups)) {
-            const list = studioGroups[type];
-            const price = Number(list[0].price).toLocaleString('id-ID');
-            studiosHtml += `
-              <div class="pt-2 border-t border-slate-800/80">
-                <div class="flex justify-between items-center text-xs mb-2">
-                  <span class="font-bold text-slate-200">${type}</span>
-                  <span class="font-mono text-slate-400">Rp ${price}</span>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                  ${list.map(st => `
-                    <button onclick="openSeatSelection(${st.id}, '${activeMovie.title}', '${cinema.name}', '${type}', '${st.startTime}')" class="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-950 hover:border-sky-500 hover:text-sky-400 font-mono text-xs font-bold transition">
-                      ${st.startTime}
-                    </button>
-                  `).join('')}
-                </div>
-              </div>
-            `;
-          }
-        }
-
-        card.innerHTML = `
-          <div class="flex items-start justify-between">
-            <div>
-              <div class="flex items-center gap-1.5">
-                <i class="fa-regular fa-star text-amber-400 text-xs"></i>
-                <h3 class="font-bold text-xs text-white">${cinema.name}</h3>
-              </div>
-              <p class="text-[10px] text-slate-400 mt-0.5">${cinema.address}</p>
+      cinemas.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'p-4 rounded-2xl bg-slate-950 border border-slate-800 flex justify-between items-center';
+        item.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-sky-400 border border-slate-700">${c.brand}</span>
+              <h4 class="font-bold text-xs text-white">${c.name}</h4>
             </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">${cinema.brand}</span>
+            <p class="text-[10px] text-slate-400 mt-1">${c.address}</p>
           </div>
-          ${studiosHtml}
+          <button onclick="switchTab('home')" class="btn-spring px-3 py-1.5 rounded-lg bg-sky-500 text-slate-950 font-bold text-xs">Pilih Film</button>
         `;
-        container.appendChild(card);
-      }
+        container.appendChild(item);
+      });
     }
 
     // 6. Interactive Seat Selection with SEAT HOLD (Grey state while in payment)
@@ -857,7 +1293,6 @@
         const seats = json.data || [];
         container.innerHTML = '';
 
-        // Group seats by row (A..E)
         const rows = {};
         seats.forEach(s => {
           if (!rows[s.seatRow]) rows[s.seatRow] = [];
@@ -892,7 +1327,7 @@
               btn.title = 'Sedang dalam proses pembayaran oleh pembeli lain';
               btn.disabled = true;
             } else if (isSelected) {
-              btn.className = 'w-7 h-7 rounded-md bg-amber-500 text-slate-950 font-bold text-[10px] flex items-center justify-center shadow-md shadow-amber-500/30 scale-105';
+              btn.className = 'w-7 h-7 rounded-md bg-amber-500 text-slate-950 font-bold text-[10px] flex items-center justify-center shadow-md shadow-amber-500/30 scale-110 transition-transform';
               btn.innerText = seat.seatCode;
               btn.onclick = () => toggleShowtimeSeat(seat);
             } else {
@@ -900,7 +1335,7 @@
               if (seat.tier === 'SATINE_SUITE') tierColor = 'border-purple-500/40 bg-purple-950/40 text-purple-300';
               if (seat.tier === 'SWEET_BOX') tierColor = 'border-pink-500/40 bg-pink-950/40 text-pink-300';
 
-              btn.className = `w-7 h-7 rounded-md border ${tierColor} transition text-[10px] font-bold flex items-center justify-center active:scale-95`;
+              btn.className = `btn-spring w-7 h-7 rounded-md border ${tierColor} text-[10px] font-bold flex items-center justify-center`;
               btn.innerText = seat.seatCode;
               btn.onclick = () => toggleShowtimeSeat(seat);
             }
@@ -941,7 +1376,7 @@
     // 7. Proceed to Checkout: Hold seats (turns grey on other screens) and start 5 min timer
     async function proceedToCheckoutWithHold() {
       if (selectedSeats.size === 0) {
-        alert('Pilih minimal 1 kursi terlebih dahulu!');
+        showToast('Pilih minimal 1 kursi terlebih dahulu!', 'error');
         return;
       }
 
@@ -949,7 +1384,6 @@
       const custName = document.getElementById('checkoutCustName').value.trim();
 
       try {
-        // Hold seats via API (status becomes HELD / abu-abu)
         const res = await fetch(`/api/showtimes/${selectedShowtime.id}/hold`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -962,15 +1396,15 @@
 
         const json = await res.json();
         if (!json.success) {
-          alert('Gagal mengunci kursi: ' + json.message);
+          showToast('Gagal mengunci kursi: ' + json.message, 'error');
           return;
         }
 
-        // Open checkout modal
+        showToast('Kursi berhasil dikunci (Status Abu-abu)!', 'success');
         closeSeatModal();
         openCheckoutModal();
       } catch (e) {
-        alert('Terjadi kesalahan saat menahan kursi.');
+        showToast('Terjadi kesalahan saat menahan kursi.', 'error');
       }
     }
 
@@ -1002,16 +1436,16 @@
         row.className = 'flex items-center justify-between p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs';
         row.innerHTML = `
           <div class="flex items-center gap-2">
-            <img src="${item.imageUrl}" class="w-8 h-8 rounded-lg object-cover">
+            <img src="${item.imageUrl}" onerror="handleImgError(this)" class="w-8 h-8 rounded-lg object-cover bg-slate-900">
             <div>
               <div class="font-bold text-slate-200">${item.name}</div>
               <div class="text-[10px] text-amber-400 font-mono">Rp ${Number(item.price).toLocaleString('id-ID')}</div>
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="updateFnbQty(${item.id}, -1)" class="w-6 h-6 rounded bg-slate-800 text-slate-300 font-bold">-</button>
+            <button onclick="updateFnbQty(${item.id}, -1)" class="btn-spring w-6 h-6 rounded bg-slate-800 text-slate-300 font-bold">-</button>
             <span class="w-4 text-center font-bold font-mono">${qty}</span>
-            <button onclick="updateFnbQty(${item.id}, 1)" class="w-6 h-6 rounded bg-sky-600 text-white font-bold">+</button>
+            <button onclick="updateFnbQty(${item.id}, 1)" class="btn-spring w-6 h-6 rounded bg-sky-600 text-white font-bold">+</button>
           </div>
         `;
         container.appendChild(row);
@@ -1076,7 +1510,7 @@
 
         if (left <= 0) {
           clearInterval(currentHoldTimerInterval);
-          alert('Batas waktu pembayaran habis! Kursi telah dilepaskan kembali.');
+          showToast('Batas waktu habis! Kursi telah dibebaskan kembali.', 'error');
           closeCheckoutModal();
         }
       }, 1000);
@@ -1094,11 +1528,11 @@
       const payMethod = document.querySelector('input[name="checkoutPayMethod"]:checked').value;
 
       if (!custName) {
-        alert('Nama pembeli wajib diisi!');
+        showToast('Nama pembeli wajib diisi!', 'error');
         return;
       }
       if (!payAmount || isNaN(payAmount)) {
-        alert('Masukkan nominal uang pembayaran yang valid!');
+        showToast('Masukkan nominal uang pembayaran yang valid!', 'error');
         return;
       }
 
@@ -1127,14 +1561,15 @@
           closeCheckoutModal();
           currentClaimedTicket = json.data;
           showTicketDetail(json.data);
+          showToast('Pembayaran berhasil! E-Ticket telah terbit.', 'success');
           fetchActiveBookings();
           selectedSeats.clear();
           selectedFnb.clear();
         } else {
-          alert('Gagal Transaksi: ' + json.message);
+          showToast('Gagal: ' + json.message, 'error');
         }
       } catch (e) {
-        alert('Terjadi kesalahan menghubungi server.');
+        showToast('Terjadi kesalahan menghubungi server.', 'error');
       }
     }
 
@@ -1155,7 +1590,7 @@
       document.getElementById('ticketDetailModal').classList.add('hidden');
     }
 
-    // 11. Render Active Tickets Tab (Screenshot 5)
+    // 11. Render Active Tickets Tab
     function renderActiveTickets() {
       const container = document.getElementById('activeTicketList');
       container.innerHTML = '';
@@ -1168,7 +1603,7 @@
             </div>
             <h4 class="font-bold text-sm text-slate-200">Belum Ada Tiket Aktif</h4>
             <p class="text-xs text-slate-400 mt-1 max-w-xs">Pesan tiket film favorit Anda sekarang untuk menikmati serunya menonton di bioskop!</p>
-            <button onclick="switchTab('home')" class="mt-4 px-5 py-2 rounded-xl bg-sky-500 text-slate-950 font-bold text-xs">Lihat Film</button>
+            <button onclick="switchTab('home')" class="btn-spring mt-4 px-5 py-2 rounded-xl bg-sky-500 text-slate-950 font-bold text-xs">Lihat Film</button>
           </div>
         `;
         return;
@@ -1176,18 +1611,18 @@
 
       activeBookings.forEach(t => {
         const card = document.createElement('div');
-        card.className = 'p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3 cursor-pointer hover:border-sky-500/50 transition';
+        card.className = 'btn-spring p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 cursor-pointer hover:border-sky-500/50 shadow';
         card.onclick = () => showTicketDetail(t);
 
         card.innerHTML = `
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
             <span class="text-[10px] font-mono text-slate-400">${t.bookingCode}</span>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded ${t.ticketClaimed ? 'bg-slate-800 text-slate-400' : 'bg-emerald-500/20 text-emerald-400'}">
               ${t.ticketClaimed ? 'TIKET SUDAH DICETAK' : 'SIAP DITUKAR DI KIOSK'}
             </span>
           </div>
           <div class="flex gap-3">
-            <img src="${t.moviePosterUrl || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=150&q=80'}" class="w-14 h-20 rounded-xl object-cover">
+            <img src="${t.moviePosterUrl || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=150&q=80'}" onerror="handleImgError(this)" class="w-14 h-20 rounded-xl object-cover bg-slate-900">
             <div class="flex-1">
               <h4 class="font-bold text-xs text-white">${t.movieTitle}</h4>
               <p class="text-[11px] text-slate-400">${t.cinemaName}</p>
@@ -1210,10 +1645,10 @@
 
       foods.forEach(f => {
         const item = document.createElement('div');
-        item.className = 'flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-800';
+        item.className = 'flex items-center justify-between p-3 rounded-2xl bg-slate-950 border border-slate-800';
         item.innerHTML = `
           <div class="flex items-center gap-3">
-            <img src="${f.imageUrl}" class="w-16 h-16 rounded-xl object-cover shadow">
+            <img src="${f.imageUrl}" onerror="handleImgError(this)" class="w-16 h-16 rounded-xl object-cover shadow bg-slate-900">
             <div>
               <span class="text-[9px] font-bold uppercase text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">${f.category}</span>
               <h4 class="font-bold text-xs text-white mt-1">${f.name}</h4>
@@ -1221,7 +1656,7 @@
               <span class="text-xs font-bold text-sky-400 font-mono mt-1 block">Rp ${Number(f.price).toLocaleString('id-ID')}</span>
             </div>
           </div>
-          <button onclick="alert('Item ${f.name} bisa ditambahkan saat Anda memilih kursi dan melakukan checkout tiket film!')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">
+          <button onclick="showToast('Item ${f.name} dapat Anda tambahkan saat memilih kursi film!', 'info')" class="btn-spring px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">
             Pesan
           </button>
         `;
@@ -1248,7 +1683,7 @@
     async function submitKioskClaim() {
       const code = document.getElementById('kioskCodeInput').value.trim();
       if (!code) {
-        alert('Masukkan PIN / Kode Klaim!');
+        showToast('Masukkan PIN / Kode Klaim!', 'error');
         return;
       }
 
@@ -1267,12 +1702,13 @@
           document.getElementById('kioskPrintSeat').innerText = t.seatCodesSummary;
           document.getElementById('kioskPrintTime').innerText = t.showDateTime;
           document.getElementById('kioskPrintResult').classList.remove('hidden');
+          showToast('Tiket fisik berhasil dicetak di Kiosk!', 'success');
           fetchActiveBookings();
         } else {
-          alert('Gagal: ' + json.message);
+          showToast('Gagal: ' + json.message, 'error');
         }
       } catch (e) {
-        alert('Terjadi kesalahan menghubungi mesin Kiosk.');
+        showToast('Terjadi kesalahan menghubungi mesin Kiosk.', 'error');
       }
     }
 
@@ -1294,7 +1730,7 @@
       } else if (tab === 'cinemas') {
         document.getElementById('tabCinemas').classList.remove('hidden');
         document.getElementById('navCinemas').classList.add('text-sky-400');
-        renderCinemaShowtimes();
+        renderGeneralCinemasTab();
       } else if (tab === 'tickets') {
         document.getElementById('tabTickets').classList.remove('hidden');
         document.getElementById('navTickets').classList.add('text-sky-400');
@@ -1314,22 +1750,17 @@
       document.getElementById('selectedCityLabel').innerText = city;
       document.getElementById('cinemaCityFilterLabel').innerText = city;
       document.getElementById('cityDropdown').classList.add('hidden');
+      showToast(`Wilayah diubah ke ${city}`, 'info');
       fetchCinemas();
     }
 
     function filterBrand(brand) {
       currentBrand = brand;
       document.querySelectorAll('.brand-tab').forEach(b => {
-        b.className = 'brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap';
+        b.className = 'brand-tab btn-spring px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap';
       });
-      event.target.className = 'brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-500 text-slate-950 whitespace-nowrap';
-      
-      if (brand === 'ALL') {
-        renderNowShowing();
-      } else {
-        // filter display
-        renderNowShowing();
-      }
+      event.target.className = 'brand-tab btn-spring px-3.5 py-1.5 rounded-full text-xs font-semibold bg-sky-500 text-slate-950 whitespace-nowrap';
+      renderNowShowing();
     }
 
     function handleSearch(query) {
@@ -1342,15 +1773,365 @@
       container.innerHTML = '';
       filtered.forEach(movie => {
         const card = document.createElement('div');
-        card.className = 'group cursor-pointer rounded-2xl bg-slate-900 border border-slate-800 hover:border-sky-500/50 p-2.5';
+        card.className = 'btn-spring cursor-pointer rounded-2xl bg-slate-900 border border-slate-800 p-3';
         card.onclick = () => openMovieDetail(movie);
         card.innerHTML = `<h3 class="font-bold text-xs text-white">${movie.title}</h3><p class="text-[10px] text-slate-400">${movie.genre}</p>`;
         container.appendChild(card);
       });
     }
 
+    // 15. Login & Role Switching Logic (User vs Admin)
     function openLoginModal() {
-      alert("Akun Terhubung: Randi Pratama (randi@tixid.example.com)\nSaldo TIX VIP Coins: 8.399 Coins (Aktif)");
+      document.getElementById('loginModal').classList.remove('hidden');
+    }
+
+    function closeLoginModal() {
+      document.getElementById('loginModal').classList.add('hidden');
+    }
+
+    function switchLoginRole(role) {
+      const btnUser = document.getElementById('roleBtnUser');
+      const btnAdmin = document.getElementById('roleBtnAdmin');
+      const formUser = document.getElementById('formUserLogin');
+      const formAdmin = document.getElementById('formAdminLogin');
+
+      if (role === 'user') {
+        btnUser.className = 'py-2 rounded-lg font-bold bg-sky-500 text-slate-950 transition';
+        btnAdmin.className = 'py-2 rounded-lg font-bold text-slate-400 hover:text-white transition';
+        formUser.classList.remove('hidden');
+        formAdmin.classList.add('hidden');
+      } else {
+        btnAdmin.className = 'py-2 rounded-lg font-bold bg-amber-500 text-slate-950 transition';
+        btnUser.className = 'py-2 rounded-lg font-bold text-slate-400 hover:text-white transition';
+        formAdmin.classList.remove('hidden');
+        formUser.classList.add('hidden');
+      }
+    }
+
+    function submitUserLogin() {
+      const name = document.getElementById('loginCustName').value.trim();
+      const email = document.getElementById('loginCustEmail').value.trim();
+      document.getElementById('checkoutCustName').value = name;
+      closeLoginModal();
+      showToast(`Selamat datang kembali, ${name}!`, 'success');
+    }
+
+    function submitAdminLogin() {
+      const email = document.getElementById('loginAdminEmail').value.trim();
+      const pass = document.getElementById('loginAdminPassword').value.trim();
+
+      if (pass !== 'admin123') {
+        showToast('Password Admin salah! (Gunakan: admin123)', 'error');
+        return;
+      }
+
+      closeLoginModal();
+      showToast('Login Administrator Berhasil! Membuka CMS Backoffice...', 'success');
+      openAdminView();
+    }
+
+    // 16. Admin CMS Dashboard Logic
+    function openAdminView() {
+      document.getElementById('customerAppView').classList.add('hidden');
+      document.getElementById('adminAppView').classList.remove('hidden');
+      populateAdminForms();
+    }
+
+    function switchBackToCustomerApp() {
+      document.getElementById('adminAppView').classList.add('hidden');
+      document.getElementById('customerAppView').classList.remove('hidden');
+      showToast('Kembali ke tampilan pengguna', 'info');
+      fetchMovies();
+      fetchCinemas();
+    }
+
+    function switchAdminTab(tab) {
+      document.getElementById('adminTabMovies').classList.add('hidden');
+      document.getElementById('adminTabCinemas').classList.add('hidden');
+      document.getElementById('adminTabShowtimes').classList.add('hidden');
+      document.getElementById('adminTabSales').classList.add('hidden');
+
+      document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.className = 'admin-tab-btn btn-spring px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700';
+      });
+
+      if (tab === 'movies') {
+        document.getElementById('adminTabMovies').classList.remove('hidden');
+        document.getElementById('adminTabBtnMovies').className = 'admin-tab-btn btn-spring px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 text-slate-950';
+        renderAdminMovieTable();
+      } else if (tab === 'cinemas') {
+        document.getElementById('adminTabCinemas').classList.remove('hidden');
+        document.getElementById('adminTabBtnCinemas').className = 'admin-tab-btn btn-spring px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 text-slate-950';
+      } else if (tab === 'showtimes') {
+        document.getElementById('adminTabShowtimes').classList.remove('hidden');
+        document.getElementById('adminTabBtnShowtimes').className = 'admin-tab-btn btn-spring px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 text-slate-950';
+      } else if (tab === 'sales') {
+        document.getElementById('adminTabSales').classList.remove('hidden');
+        document.getElementById('adminTabBtnSales').className = 'admin-tab-btn btn-spring px-4 py-2 rounded-xl text-xs font-bold bg-sky-500 text-slate-950';
+        renderAdminSales();
+      }
+    }
+
+    function populateAdminForms() {
+      renderAdminMovieTable();
+
+      // Populate Cinema dropdowns
+      const cinemaSelects = [document.getElementById('adminStudioCinemaSelect'), document.getElementById('adminStCinemaSelect')];
+      cinemaSelects.forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = '';
+        cinemas.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.innerText = `${c.name} (${c.city})`;
+          sel.appendChild(opt);
+        });
+      });
+
+      // Populate Movie dropdown for Showtimes
+      const movieSel = document.getElementById('adminStMovieSelect');
+      if (movieSel) {
+        movieSel.innerHTML = '';
+        movies.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          opt.innerText = m.title;
+          movieSel.appendChild(opt);
+        });
+      }
+
+      if (cinemas.length > 0) {
+        loadStudiosForAdminShowtime(cinemas[0].id);
+      }
+
+      // Default date today
+      const dateInp = document.getElementById('adminStDate');
+      if (dateInp) dateInp.value = new Date().toISOString().split('T')[0];
+    }
+
+    async function loadStudiosForAdminShowtime(cinemaId) {
+      const sel = document.getElementById('adminStStudioSelect');
+      sel.innerHTML = '';
+      try {
+        const res = await fetch(`/api/cinemas/${cinemaId}/studios`);
+        const json = await res.json();
+        const studios = json.data || [];
+        studios.forEach(st => {
+          const opt = document.createElement('option');
+          opt.value = st.id;
+          opt.innerText = `${st.name} (${st.studioType})`;
+          sel.appendChild(opt);
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderAdminMovieTable() {
+      const tbody = document.getElementById('adminMovieTableBody');
+      tbody.innerHTML = '';
+      movies.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-3"><img src="${m.posterUrl}" onerror="handleImgError(this)" class="w-8 h-12 rounded object-cover"></td>
+          <td class="p-3 font-bold text-white">${m.title}</td>
+          <td class="p-3">${m.genre}</td>
+          <td class="p-3">${m.durationMinutes} m</td>
+          <td class="p-3 text-amber-400 font-bold">${m.imdbRating}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${m.nowShowing ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'}">${m.nowShowing ? 'Tayang' : 'Coming Soon'}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function submitNewMovie() {
+      const title = document.getElementById('adminMovieTitle').value.trim();
+      const genre = document.getElementById('adminMovieGenre').value.trim();
+      const duration = parseInt(document.getElementById('adminMovieDuration').value);
+      const imdb = document.getElementById('adminMovieImdb').value.trim() || '8.0/10';
+      const age = document.getElementById('adminMovieAge').value;
+      const poster = document.getElementById('adminMoviePoster').value.trim() || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=80';
+      const synopsis = document.getElementById('adminMovieSynopsis').value.trim() || 'Sinopsis film baru.';
+
+      if (!title || !genre || !duration) {
+        showToast('Lengkapi Judul, Genre, dan Durasi Film!', 'error');
+        return;
+      }
+
+      const payload = {
+        title, genre, durationMinutes: duration, imdbRating: imdb, rottenScore: '90%',
+        ageRating: age, posterUrl: poster, backdropUrl: poster, synopsis, trailerUrl: 'https://youtube.com',
+        nowShowing: true
+      };
+
+      try {
+        const res = await fetch('/api/movies', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.success) {
+          showToast(`Film '${title}' berhasil ditambahkan ke katalog!`, 'success');
+          document.getElementById('adminMovieTitle').value = '';
+          await fetchMovies();
+          renderAdminMovieTable();
+        }
+      } catch (e) {
+        showToast('Gagal menyimpan film.', 'error');
+      }
+    }
+
+    async function submitNewCinema() {
+      const name = document.getElementById('adminCinemaName').value.trim();
+      const city = document.getElementById('adminCinemaCity').value;
+      const brand = document.getElementById('adminCinemaBrand').value;
+      const address = document.getElementById('adminCinemaAddress').value.trim();
+
+      if (!name) {
+        showToast('Nama bioskop wajib diisi!', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/cinemas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, city, brand, address })
+        });
+        const json = await res.json();
+        if (json.success) {
+          showToast(`Bioskop '${name}' berhasil didaftarkan!`, 'success');
+          document.getElementById('adminCinemaName').value = '';
+          await fetchCinemas();
+          populateAdminForms();
+        }
+      } catch (e) {
+        showToast('Gagal mendaftarkan bioskop.', 'error');
+      }
+    }
+
+    async function submitNewStudio() {
+      const cinemaId = document.getElementById('adminStudioCinemaSelect').value;
+      const name = document.getElementById('adminStudioName').value.trim();
+      const type = document.getElementById('adminStudioType').value;
+
+      if (!name) {
+        showToast('Nama studio wajib diisi!', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/cinemas/${cinemaId}/studios`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, studioType: type, totalSeats: 34 })
+        });
+        const json = await res.json();
+        if (json.success) {
+          showToast(`Studio '${name}' berhasil ditambahkan ke bioskop!`, 'success');
+          document.getElementById('adminStudioName').value = '';
+        }
+      } catch (e) {
+        showToast('Gagal menambahkan studio.', 'error');
+      }
+    }
+
+    async function submitNewShowtime() {
+      const movieId = document.getElementById('adminStMovieSelect').value;
+      const cinemaId = document.getElementById('adminStCinemaSelect').value;
+      const studioId = document.getElementById('adminStStudioSelect').value;
+      const date = document.getElementById('adminStDate').value;
+      const time = document.getElementById('adminStTime').value.trim();
+      const price = parseFloat(document.getElementById('adminStPrice').value);
+
+      if (!time || !price) {
+        showToast('Lengkapi Jam Tayang dan Harga Tiket!', 'error');
+        return;
+      }
+
+      const studioType = document.getElementById('adminStStudioSelect').selectedOptions[0]?.innerText.split('(')[1]?.replace(')', '') || 'REGULAR 2D';
+
+      try {
+        const res = await fetch('/api/cinemas/showtimes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            movieId: parseInt(movieId),
+            cinemaId: parseInt(cinemaId),
+            studioId: parseInt(studioId),
+            studioType: studioType.trim(),
+            showDate: date,
+            startTime: time,
+            price: price
+          })
+        });
+        const json = await res.json();
+        if (json.success) {
+          showToast(`Jadwal jam ${time} berhasil dibuat beserta 34 kursi siap dipesan!`, 'success');
+          document.getElementById('adminStTime').value = '';
+        }
+      } catch (e) {
+        showToast('Gagal membuat jadwal tayang.', 'error');
+      }
+    }
+
+    function renderAdminSales() {
+      const container = document.getElementById('adminSalesContainer');
+      container.innerHTML = '';
+
+      let totalRevenue = 0;
+      activeBookings.forEach(b => totalRevenue += (b.grandTotal || 0));
+
+      const stats = document.createElement('div');
+      stats.className = 'grid grid-cols-1 sm:grid-cols-3 gap-3';
+      stats.innerHTML = `
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+          <div class="text-[10px] text-slate-400 uppercase font-bold">Total Transaksi</div>
+          <div class="text-xl font-black text-white mt-1">${activeBookings.length} Tiket</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+          <div class="text-[10px] text-slate-400 uppercase font-bold">Total Pendapatan</div>
+          <div class="text-xl font-black text-amber-400 mt-1">Rp ${Number(totalRevenue).toLocaleString('id-ID')}</div>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800">
+          <div class="text-[10px] text-slate-400 uppercase font-bold">Kapasitas Kursi Terisi</div>
+          <div class="text-xl font-black text-sky-400 mt-1">94% Okupansi</div>
+        </div>
+      `;
+      container.appendChild(stats);
+
+      const tableDiv = document.createElement('div');
+      tableDiv.className = 'overflow-x-auto rounded-2xl border border-slate-800 mt-4';
+      tableDiv.innerHTML = `
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+            <tr>
+              <th class="p-3">Kode Booking</th>
+              <th class="p-3">PIN Klaim</th>
+              <th class="p-3">Pelanggan</th>
+              <th class="p-3">Film &amp; Studio</th>
+              <th class="p-3">Kursi</th>
+              <th class="p-3">Total Bayar</th>
+              <th class="p-3">Cetak Kiosk</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800 bg-slate-900">
+            ${activeBookings.map(b => `
+              <tr>
+                <td class="p-3 font-mono text-sky-400">${b.bookingCode}</td>
+                <td class="p-3 font-mono font-bold text-amber-400">${b.claimCode}</td>
+                <td class="p-3 text-white font-medium">${b.customerName}</td>
+                <td class="p-3">${b.movieTitle} (${b.studioName})</td>
+                <td class="p-3 font-mono">${b.seatCodesSummary}</td>
+                <td class="p-3 font-mono text-slate-200">Rp ${Number(b.grandTotal).toLocaleString('id-ID')}</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${b.ticketClaimed ? 'bg-slate-800 text-slate-400' : 'bg-emerald-500/20 text-emerald-400'}">${b.ticketClaimed ? 'TERCETAK' : 'BELUM'}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      container.appendChild(tableDiv);
     }
   </script>
 </body>
