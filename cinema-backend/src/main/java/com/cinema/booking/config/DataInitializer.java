@@ -199,68 +199,60 @@ public class DataInitializer implements CommandLineRunner {
             cinemaRepository.saveAll(cinemas);
         }
 
-        // 4. Initial Studios & Showtimes for 23 Paskal CGV (Cinema ID 1)
-        Cinema paskal = cinemaRepository.findAll().stream()
-            .filter(c -> c.getName().contains("23 Paskal"))
-            .findFirst().orElse(null);
-
-        if (paskal != null && studioRepository.count() == 0) {
-            log.info("Menginisialisasi studio dan jadwal tayang...");
-            Studio regStudio = studioRepository.save(new Studio(paskal.getId(), "Studio 1", "REGULAR 2D", 34));
-            Studio goldStudio = studioRepository.save(new Studio(paskal.getId(), "Gold Class", "GOLD CLASS 2D", 34));
-            Studio velvetStudio = studioRepository.save(new Studio(paskal.getId(), "Velvet Suite", "VELVET 2D", 34));
-
-            Movie godzilla = movieRepository.findAll().stream().filter(m -> m.getTitle().contains("Godzilla")).findFirst().orElse(null);
-            Movie spiderman = movieRepository.findAll().stream().filter(m -> m.getTitle().contains("Spider-Man")).findFirst().orElse(null);
-
+        // 4. Initial Studios & Showtimes for Bandung Cinemas
+        if (studioRepository.count() == 0) {
+            log.info("Menginisialisasi studio dan jadwal tayang bioskop...");
+            List<Cinema> bandungCinemas = cinemaRepository.findByCityIgnoreCase("BANDUNG");
+            List<Movie> nowShowingMovies = movieRepository.findByNowShowingTrue();
             String today = LocalDate.now().toString();
 
-            List<Showtime> showtimes = new ArrayList<>();
-            if (godzilla != null) {
-                // REGULAR 2D (Rp 45.000)
-                showtimes.add(new Showtime(godzilla.getId(), paskal.getId(), regStudio.getId(), "REGULAR 2D", today, "12:30", new BigDecimal("45000.00")));
-                showtimes.add(new Showtime(godzilla.getId(), paskal.getId(), regStudio.getId(), "REGULAR 2D", today, "15:15", new BigDecimal("45000.00")));
-                showtimes.add(new Showtime(godzilla.getId(), paskal.getId(), regStudio.getId(), "REGULAR 2D", today, "18:00", new BigDecimal("45000.00")));
-                showtimes.add(new Showtime(godzilla.getId(), paskal.getId(), regStudio.getId(), "REGULAR 2D", today, "20:45", new BigDecimal("45000.00")));
+            List<Showtime> allShowtimes = new ArrayList<>();
 
-                // GOLD CLASS 2D (Rp 80.000 - sesuai screenshot 4)
-                showtimes.add(new Showtime(godzilla.getId(), paskal.getId(), goldStudio.getId(), "GOLD CLASS 2D", today, "13:30", new BigDecimal("80000.00")));
-                showtimes.add(new Showtime(godzilla.getId(), paskal.getId(), goldStudio.getId(), "GOLD CLASS 2D", today, "16:15", new BigDecimal("80000.00")));
-                showtimes.add(new Showtime(godzilla.getId(), paskal.getId(), goldStudio.getId(), "GOLD CLASS 2D", today, "19:00", new BigDecimal("80000.00")));
+            for (Cinema cinema : bandungCinemas) {
+                Studio regStudio = studioRepository.save(new Studio(cinema.getId(), "Studio 1", "REGULAR 2D", 34));
+                Studio goldStudio = studioRepository.save(new Studio(cinema.getId(), "Gold Class", "GOLD CLASS 2D", 34));
+                Studio velvetStudio = studioRepository.save(new Studio(cinema.getId(), "Velvet Suite", "VELVET 2D", 34));
 
-                // VELVET 2D (Rp 80.000 - sesuai screenshot 4)
-                showtimes.add(new Showtime(godzilla.getId(), paskal.getId(), velvetStudio.getId(), "VELVET 2D", today, "14:00", new BigDecimal("80000.00")));
-                showtimes.add(new Showtime(godzilla.getId(), paskal.getId(), velvetStudio.getId(), "VELVET 2D", today, "16:45", new BigDecimal("80000.00")));
-                showtimes.add(new Showtime(godzilla.getId(), paskal.getId(), velvetStudio.getId(), "VELVET 2D", today, "19:30", new BigDecimal("80000.00")));
+                for (Movie m : nowShowingMovies) {
+                    // Regular 2D (Rp 45.000)
+                    allShowtimes.add(new Showtime(m.getId(), cinema.getId(), regStudio.getId(), "REGULAR 2D", today, "12:30", new BigDecimal("45000.00")));
+                    allShowtimes.add(new Showtime(m.getId(), cinema.getId(), regStudio.getId(), "REGULAR 2D", today, "15:15", new BigDecimal("45000.00")));
+                    allShowtimes.add(new Showtime(m.getId(), cinema.getId(), regStudio.getId(), "REGULAR 2D", today, "18:00", new BigDecimal("45000.00")));
+                    allShowtimes.add(new Showtime(m.getId(), cinema.getId(), regStudio.getId(), "REGULAR 2D", today, "20:45", new BigDecimal("45000.00")));
+
+                    // Gold Class 2D (Rp 80.000)
+                    allShowtimes.add(new Showtime(m.getId(), cinema.getId(), goldStudio.getId(), "GOLD CLASS 2D", today, "13:30", new BigDecimal("80000.00")));
+                    allShowtimes.add(new Showtime(m.getId(), cinema.getId(), goldStudio.getId(), "GOLD CLASS 2D", today, "16:15", new BigDecimal("80000.00")));
+                    allShowtimes.add(new Showtime(m.getId(), cinema.getId(), goldStudio.getId(), "GOLD CLASS 2D", today, "19:00", new BigDecimal("80000.00")));
+
+                    // Velvet 2D (Rp 80.000)
+                    allShowtimes.add(new Showtime(m.getId(), cinema.getId(), velvetStudio.getId(), "VELVET 2D", today, "14:00", new BigDecimal("80000.00")));
+                    allShowtimes.add(new Showtime(m.getId(), cinema.getId(), velvetStudio.getId(), "VELVET 2D", today, "16:45", new BigDecimal("80000.00")));
+                    allShowtimes.add(new Showtime(m.getId(), cinema.getId(), velvetStudio.getId(), "VELVET 2D", today, "19:30", new BigDecimal("80000.00")));
+                }
             }
 
-            if (spiderman != null) {
-                showtimes.add(new Showtime(spiderman.getId(), paskal.getId(), regStudio.getId(), "REGULAR 2D", today, "13:00", new BigDecimal("45000.00")));
-                showtimes.add(new Showtime(spiderman.getId(), paskal.getId(), regStudio.getId(), "REGULAR 2D", today, "16:30", new BigDecimal("45000.00")));
-                showtimes.add(new Showtime(spiderman.getId(), paskal.getId(), regStudio.getId(), "REGULAR 2D", today, "19:45", new BigDecimal("45000.00")));
-            }
-
-            List<Showtime> savedShowtimes = showtimeRepository.saveAll(showtimes);
+            List<Showtime> savedShowtimes = showtimeRepository.saveAll(allShowtimes);
 
             // Inisialisasi kursi per jadwal tayang
+            List<ShowtimeSeat> allSeats = new ArrayList<>();
             for (Showtime st : savedShowtimes) {
-                List<ShowtimeSeat> stSeats = new ArrayList<>();
                 // Row A: Satine Suite (A1-A4)
                 for (int i = 1; i <= 4; i++) {
-                    stSeats.add(new ShowtimeSeat(st.getId(), "A" + i, "A", i, SeatTier.SATINE_SUITE, SeatTier.SATINE_SUITE.getBasePrice()));
+                    allSeats.add(new ShowtimeSeat(st.getId(), "A" + i, "A", i, SeatTier.SATINE_SUITE, SeatTier.SATINE_SUITE.getBasePrice()));
                 }
                 // Row B: Sweet Box (B1-B6)
                 for (int i = 1; i <= 6; i++) {
-                    stSeats.add(new ShowtimeSeat(st.getId(), "B" + i, "B", i, SeatTier.SWEET_BOX, SeatTier.SWEET_BOX.getBasePrice()));
+                    allSeats.add(new ShowtimeSeat(st.getId(), "B" + i, "B", i, SeatTier.SWEET_BOX, SeatTier.SWEET_BOX.getBasePrice()));
                 }
                 // Row C, D, E: Reguler (8 per row)
                 for (String r : List.of("C", "D", "E")) {
                     for (int i = 1; i <= 8; i++) {
-                        stSeats.add(new ShowtimeSeat(st.getId(), r + i, r, i, SeatTier.REGULER, SeatTier.REGULER.getBasePrice()));
+                        allSeats.add(new ShowtimeSeat(st.getId(), r + i, r, i, SeatTier.REGULER, SeatTier.REGULER.getBasePrice()));
                     }
                 }
-                showtimeSeatRepository.saveAll(stSeats);
             }
+            showtimeSeatRepository.saveAll(allSeats);
         }
 
         // 5. Initial Food & Beverage Items (Concessions)

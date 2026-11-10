@@ -84,11 +84,11 @@ const Api = {
     getSeats: (showtimeId) => Api.request(`/api/showtimes/${showtimeId}/seats`),
     hold: (showtimeId, seatCodes, customerName) => Api.request(`/api/showtimes/${showtimeId}/hold`, {
       method: 'POST',
-      body: JSON.stringify({ seatCodes, customerName })
+      body: JSON.stringify({ showtimeId, seatCodes, customerName })
     }),
     release: (showtimeId, seatCodes, customerName) => Api.request(`/api/showtimes/${showtimeId}/release`, {
       method: 'POST',
-      body: JSON.stringify({ seatCodes, customerName })
+      body: JSON.stringify({ showtimeId, seatCodes, customerName })
     })
   },
 

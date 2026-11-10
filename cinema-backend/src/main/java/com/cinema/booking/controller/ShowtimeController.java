@@ -32,7 +32,8 @@ public class ShowtimeController {
         @PathVariable Long id,
         @Valid @RequestBody HoldSeatRequest request
     ) {
-        Map<String, Object> result = showtimeSeatService.holdSeats(id, request.seatCodes(), request.customerName(), 5);
+        Long showtimeId = request.showtimeId() != null ? request.showtimeId() : id;
+        Map<String, Object> result = showtimeSeatService.holdSeats(showtimeId, request.seatCodes(), request.customerName(), 5);
         return ResponseEntity.ok(ApiResponse.ok("Kursi berhasil ditahan selama 5 menit untuk pembayaran (Warna Abu-Abu)", result));
     }
 

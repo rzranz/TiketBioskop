@@ -441,96 +441,95 @@
     </div>
   </div>
 
-  <!-- MODAL 1: PREVIEW FILM & JADWAL LANGSUNG (Sesuai Permintaan Spesifik User!) -->
+  <!-- MODAL 1: PREVIEW FILM & JADWAL LANGSUNG (Frozen Movie Header + Scrollable Cinemas/Showtimes) -->
   <div id="movieDetailModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto hide-scrollbar shadow-2xl relative">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-lg w-full h-[92vh] flex flex-col shadow-2xl overflow-hidden relative">
       
-      <!-- Backdrop Image -->
-      <div class="relative h-48 w-full overflow-hidden bg-slate-950">
-        <img id="detailBackdrop" src="" onerror="handleImgError(this)" alt="Backdrop" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-        <button onclick="closeMovieDetail()" class="btn-spring absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-950/70 border border-slate-700 text-white flex items-center justify-center text-sm shadow">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-      </div>
+      <!-- FROZEN TOP SECTION (Movie Details, Backdrop, Ratings, Synopsis, Date Filter) -->
+      <div class="flex-shrink-0 bg-slate-900 border-b border-slate-800/80 relative">
+        <!-- Backdrop Image -->
+        <div class="relative h-28 sm:h-36 w-full overflow-hidden bg-slate-950">
+          <img id="detailBackdrop" src="" onerror="handleImgError(this)" alt="Backdrop" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
+          <button onclick="closeMovieDetail()" class="btn-spring absolute top-3 left-3 w-8 h-8 rounded-full bg-slate-950/70 border border-slate-700 text-white flex items-center justify-center text-xs shadow">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+        </div>
 
-      <div class="p-5 -mt-8 relative z-10">
-        <div class="flex gap-4">
-          <img id="detailPoster" src="" onerror="handleImgError(this)" alt="Poster" class="w-24 h-36 rounded-xl object-cover shadow-2xl border border-slate-700 flex-shrink-0 -mt-10 bg-slate-950">
-          <div class="flex-1">
-            <span id="detailBadge" class="text-[10px] font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md uppercase">NOW SHOWING</span>
-            <h2 id="detailTitle" class="text-lg font-black text-white mt-1 leading-snug">Movie Title</h2>
-            <div id="detailGenre" class="text-xs text-sky-400 font-medium mt-0.5">Action, Sci-Fi</div>
-            <div class="flex items-center gap-2 mt-2 text-[11px] text-slate-300">
-              <span id="detailAge" class="border border-slate-700 px-1.5 py-0.5 rounded bg-slate-800 font-bold">13+</span>
-              <span id="detailDuration"><i class="fa-regular fa-clock text-slate-400"></i> 125 min</span>
+        <div class="px-4 pb-2.5 -mt-8 relative z-10">
+          <div class="flex gap-3 items-end">
+            <img id="detailPoster" src="" onerror="handleImgError(this)" alt="Poster" class="w-16 h-24 sm:w-20 sm:h-28 rounded-xl object-cover shadow-2xl border border-slate-700 flex-shrink-0 bg-slate-950">
+            <div class="flex-1 min-w-0">
+              <span id="detailBadge" class="text-[9px] font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded uppercase">NOW SHOWING</span>
+              <h2 id="detailTitle" class="text-sm sm:text-base font-black text-white mt-0.5 leading-snug truncate">Movie Title</h2>
+              <div id="detailGenre" class="text-[11px] text-sky-400 font-medium truncate">Action, Sci-Fi</div>
+              <div class="flex items-center gap-2 mt-1 text-[10px] text-slate-300">
+                <span id="detailAge" class="border border-slate-700 px-1 py-0.2 rounded bg-slate-800 font-bold">13+</span>
+                <span id="detailDuration"><i class="fa-regular fa-clock text-slate-400"></i> 125 min</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rating Badges -->
+          <div class="grid grid-cols-3 gap-2 mt-2 p-1.5 rounded-xl bg-slate-950/80 border border-slate-800/90 text-center text-xs">
+            <div>
+              <div class="text-[9px] text-slate-400 font-semibold">IMDb</div>
+              <div id="detailImdb" class="text-[11px] font-bold text-amber-400">8.3/10</div>
+            </div>
+            <div>
+              <div class="text-[9px] text-slate-400 font-semibold">Rotten Tomatoes</div>
+              <div id="detailRotten" class="text-[11px] font-bold text-rose-400">98%</div>
+            </div>
+            <div>
+              <div class="text-[9px] text-slate-400 font-semibold">Match</div>
+              <div class="text-[11px] font-bold text-emerald-400">94%</div>
+            </div>
+          </div>
+
+          <!-- Synopsis (Compact) -->
+          <div class="mt-1.5">
+            <p id="detailSynopsis" class="text-[11px] text-slate-400 leading-tight line-clamp-2">Synopsis...</p>
+          </div>
+
+          <!-- Date Selector (Sticky under header) -->
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/80">
+            <span class="text-[11px] font-bold text-white flex items-center gap-1">
+              <i class="fa-solid fa-calendar-day text-sky-400"></i> Hari:
+            </span>
+            <div class="flex gap-1.5">
+              <button class="btn-spring px-2.5 py-1 rounded-lg bg-sky-500 text-slate-950 font-bold text-[10px]">HARI INI (10 Nov)</button>
+              <button class="btn-spring px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-semibold text-[10px] hover:bg-slate-700">RAB (11 Nov)</button>
+              <button class="btn-spring px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 font-semibold text-[10px] hover:bg-slate-700">KAM (12 Nov)</button>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Rating Badges -->
-        <div class="grid grid-cols-3 gap-2 my-4 p-3 rounded-2xl bg-slate-950/80 border border-slate-800/90 text-center">
-          <div>
-            <div class="text-[10px] text-slate-400 font-semibold">IMDb</div>
-            <div id="detailImdb" class="text-xs font-bold text-amber-400 mt-0.5">8.3/10</div>
-          </div>
-          <div>
-            <div class="text-[10px] text-slate-400 font-semibold">Rotten Tomatoes</div>
-            <div id="detailRotten" class="text-xs font-bold text-rose-400 mt-0.5">98%</div>
-          </div>
-          <div>
-            <div class="text-[10px] text-slate-400 font-semibold">Match</div>
-            <div class="text-xs font-bold text-emerald-400 mt-0.5">94%</div>
-          </div>
+      <!-- SCROLLABLE MIDDLE SECTION: ONLY CINEMAS & SHOWTIMES SCROLL -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-3 hide-scrollbar bg-slate-900/50">
+        <div class="flex items-center justify-between mb-1">
+          <h4 class="text-xs font-extrabold text-white flex items-center gap-1.5 uppercase tracking-wide">
+            <i class="fa-solid fa-film text-sky-400"></i> Pilih Bioskop &amp; Jam Tayang
+          </h4>
+          <span class="text-[10px] text-slate-400">Kota: <b id="detailMovieCityLabel" class="text-sky-400">BANDUNG</b></span>
         </div>
 
-        <!-- Synopsis Accordion -->
-        <div>
-          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Sinopsis</h4>
-          <p id="detailSynopsis" class="text-xs text-slate-400 leading-relaxed">Synopsis...</p>
-        </div>
-
-        <!-- DIRECT SHOWTIME SELECTION INSIDE MOVIE (Permintaan Inti Pengguna!) -->
-        <div class="mt-6 pt-4 border-t border-slate-800 space-y-4">
-          <div class="flex items-center justify-between">
-            <h4 class="text-xs font-extrabold text-white flex items-center gap-1.5 uppercase tracking-wide">
-              <i class="fa-solid fa-clock text-sky-400"></i> Pilih Bioskop &amp; Jam Tayang
-            </h4>
-            <span class="text-[10px] text-sky-400 font-medium">Kota: <b id="detailMovieCityLabel">BANDUNG</b></span>
-          </div>
-
-          <!-- Date Pills inside Movie Detail -->
-          <div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
-            <button class="btn-spring px-3 py-1.5 rounded-xl bg-sky-600 text-slate-950 font-bold text-xs flex flex-col items-center min-w-[65px]">
-              <span class="text-[9px] uppercase font-normal opacity-90">HARI INI</span>
-              <span class="text-xs font-black">10 Nov</span>
-            </button>
-            <button class="btn-spring px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex flex-col items-center min-w-[65px] hover:bg-slate-700">
-              <span class="text-[9px] uppercase font-normal text-slate-400">RAB</span>
-              <span class="text-xs font-black">11 Nov</span>
-            </button>
-            <button class="btn-spring px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex flex-col items-center min-w-[65px] hover:bg-slate-700">
-              <span class="text-[9px] uppercase font-normal text-slate-400">KAM</span>
-              <span class="text-xs font-black">12 Nov</span>
-            </button>
-          </div>
-
-          <!-- Cinemas & Showtimes Accordion Container -->
-          <div id="movieDirectShowtimesContainer" class="space-y-3">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-
-        <!-- Action CTA: Disabled until user chooses a showtime! -->
-        <div class="sticky bottom-0 bg-slate-900 pt-3 pb-1 border-t border-slate-800 mt-4 flex gap-2">
-          <button onclick="watchTrailer()" class="btn-spring px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1.5">
-            <i class="fa-solid fa-play text-rose-500"></i> Trailer
-          </button>
-          <button id="btnProceedToSeatFromMovie" onclick="proceedToSeatSelection()" disabled class="flex-1 py-3 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-not-allowed">
-            <i class="fa-solid fa-ticket"></i> <span id="btnProceedText">Pilih Jam Tayang Terlebih Dahulu</span>
-          </button>
+        <!-- Cinemas & Showtimes Accordion Container -->
+        <div id="movieDirectShowtimesContainer" class="space-y-3">
+          <!-- Populated by JS -->
         </div>
       </div>
+
+      <!-- FROZEN BOTTOM ACTION CTA: Always visible, unlocks when time is picked -->
+      <div class="flex-shrink-0 p-3 bg-slate-900 border-t border-slate-800 flex gap-2 z-20">
+        <button onclick="watchTrailer()" class="btn-spring px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-play text-rose-500"></i> Trailer
+        </button>
+        <button id="btnProceedToSeatFromMovie" onclick="proceedToSeatSelection()" disabled class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-not-allowed">
+          <i class="fa-solid fa-ticket"></i> <span id="btnProceedText">Pilih Jam Tayang Terlebih Dahulu</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
