@@ -3,343 +3,1098 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cinema Studio Booking — Reengineered</title>
+  <title>CineMax — Platform Ticketing Bioskop Modern</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .screen-curve {
-      height: 40px;
-      border-top: 5px solid #38bdf8;
+      height: 35px;
+      border-top: 5px solid #0284c7;
       border-radius: 50% 50% 0 0;
-      box-shadow: 0 -10px 25px rgba(56, 189, 248, 0.4);
+      box-shadow: 0 -12px 25px rgba(2, 132, 199, 0.45);
     }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Micro-interactions */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-ring { animation: pulse-ring 2s infinite ease-in-out; }
+    
+    @keyframes print-paper {
+      0% { max-height: 0; opacity: 0; transform: translateY(-20px); }
+      100% { max-height: 500px; opacity: 1; transform: translateY(0); }
+    }
+    .print-animation { animation: print-paper 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-start overflow-x-hidden">
 
-  <!-- Header -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
-          <i class="fa-solid fa-film text-xl text-white"></i>
+  <!-- Splash Screen / Micro Interaction Loader -->
+  <div id="splashScreen" class="fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-center transition-opacity duration-700">
+    <div class="relative flex items-center justify-center mb-6">
+      <div class="w-24 h-24 rounded-3xl bg-sky-500/10 border border-sky-500/30 pulse-ring absolute"></div>
+      <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-rose-500 flex items-center justify-center shadow-2xl shadow-sky-500/30 z-10">
+        <i class="fa-solid fa-film text-3xl text-white"></i>
+      </div>
+    </div>
+    <h1 class="text-2xl font-black tracking-tight text-white mb-1">CineMax <span class="text-sky-400">TIX</span></h1>
+    <p class="text-xs text-slate-400 font-medium tracking-wide">Modular Monolith Cinema Platform</p>
+    <div class="w-48 h-1.5 bg-slate-800 rounded-full mt-6 overflow-hidden">
+      <div id="splashProgress" class="h-full bg-gradient-to-r from-sky-400 to-indigo-500 w-0 transition-all duration-700 ease-out"></div>
+    </div>
+  </div>
+
+  <!-- App Container (Mobile Frame Simulator or Responsive View) -->
+  <div id="appViewport" class="w-full max-w-md md:max-w-xl lg:max-w-4xl min-h-screen bg-slate-900 border-x border-slate-800 shadow-2xl relative flex flex-col pb-20">
+
+    <!-- Top Bar / Header (Inspired by Screenshot 3 & 4) -->
+    <header class="bg-slate-900/90 backdrop-blur sticky top-0 z-40 border-b border-slate-800/80 px-4 py-3">
+      <div class="flex items-center justify-between gap-3">
+        
+        <!-- City Selector Dropdown -->
+        <div class="relative">
+          <button onclick="toggleCityDropdown()" class="flex items-center gap-1.5 text-xs font-bold text-slate-200 hover:text-sky-400 transition bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700/60">
+            <i class="fa-solid fa-location-dot text-rose-500"></i>
+            <span id="selectedCityLabel">BANDUNG</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+          </button>
+          
+          <!-- Dropdown List -->
+          <div id="cityDropdown" class="absolute left-0 mt-2 w-36 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl py-1 hidden z-50">
+            <button onclick="selectCity('BANDUNG')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-800 font-medium">Bandung</button>
+            <button onclick="selectCity('JAKARTA')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-800 font-medium">Jakarta</button>
+            <button onclick="selectCity('SURABAYA')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-800 font-medium">Surabaya</button>
+            <button onclick="selectCity('YOGYAKARTA')" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-800 font-medium">Yogyakarta</button>
+          </div>
         </div>
-        <div>
-          <h1 class="font-bold text-lg leading-none">CineMax Booking</h1>
-          <span class="text-xs text-amber-400 font-medium">Spring Boot Modular Monolith</span>
+
+        <!-- Search Bar -->
+        <div class="flex-1 relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+          <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Cari film, bioskop..." class="w-full bg-slate-950/80 border border-slate-800 rounded-full pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500">
+        </div>
+
+        <!-- Notification & Profile / Coins -->
+        <div class="flex items-center gap-2">
+          <button onclick="openKioskModal()" title="Simulasi Mesin Kiosk Tiket" class="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xs hover:scale-105 transition">
+            <i class="fa-solid fa-print"></i>
+          </button>
+          <button onclick="openLoginModal()" class="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/80 rounded-full pl-2 pr-2.5 py-1 text-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span id="userCoinsLabel" class="font-bold text-amber-400 text-[11px]"><i class="fa-solid fa-coins"></i> 8.399</span>
+          </button>
         </div>
       </div>
-      <div class="flex items-center space-x-3">
-        <a href="/h2-console" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-database text-sky-400"></i> H2 Database Console
-        </a>
-        <button onclick="fetchSeats()" class="text-xs bg-sky-600 hover:bg-sky-500 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5">
-          <i class="fa-solid fa-rotate"></i> Refresh Kursi
+    </header>
+
+    <!-- TAB 1: BERANDA (HOME / MOVIES) -->
+    <section id="tabHome" class="flex-1 flex flex-col p-4 gap-5">
+      
+      <!-- Promo Banner Carousel (Screenshot 3) -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-900 via-indigo-900 to-purple-900 p-4 border border-sky-500/20 shadow-lg">
+        <div class="flex justify-between items-center">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider bg-rose-500 text-white px-2 py-0.5 rounded-full">Cashback 50%</span>
+            <h3 class="font-bold text-base mt-1.5 text-white">Nonton Hemat Pakai QRIS</h3>
+            <p class="text-[11px] text-slate-300">Dapatkan diskon nonton dan voucher F&B Popcorn</p>
+          </div>
+          <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-3xl text-amber-400">
+            <i class="fa-solid fa-ticket-simple"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIX VIP+ Loyalty Bar -->
+      <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700/60">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-slate-950 font-black text-xs">
+            VIP
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-200">TIX VIP+ Member</div>
+            <div class="text-[10px] text-slate-400">Tukarkan 8.399 Coins dengan Tiket Gratis</div>
+          </div>
+        </div>
+        <button onclick="alert('Koin Anda: 8.399 Coins dapat ditukarkan di counter bioskop!')" class="text-[11px] font-bold text-sky-400 hover:underline">Tukar Hadiah &gt;</button>
+      </div>
+
+      <!-- Filter Tabs (Screenshot 3) -->
+      <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
+        <button onclick="filterBrand('ALL')" class="brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-500 text-slate-950 whitespace-nowrap">Semua Film</button>
+        <button onclick="filterBrand('XXI')" class="brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">Cinema XXI</button>
+        <button onclick="filterBrand('CGV')" class="brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">CGV Cinemas</button>
+        <button onclick="filterBrand('CINEPOLIS')" class="brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap">Cinépolis</button>
+      </div>
+
+      <!-- Section: Sedang Tayang (Now Showing) -->
+      <div>
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-base font-bold flex items-center gap-2">
+            <i class="fa-solid fa-clapperboard text-sky-400"></i> Sedang Tayang
+          </h2>
+          <span class="text-xs text-sky-400 font-medium cursor-pointer">Lihat Semua</span>
+        </div>
+
+        <!-- Movie Card Grid / Carousel -->
+        <div id="nowShowingList" class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Section: Akan Datang (Coming Soon) -->
+      <div class="mt-2">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-base font-bold flex items-center gap-2">
+            <i class="fa-solid fa-fire text-amber-400"></i> Segera Hadir
+          </h2>
+        </div>
+        <div id="comingSoonList" class="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: BIOSKOP & JADWAL (SHOWTIMES - Inspired by Screenshot 4) -->
+    <section id="tabCinemas" class="flex-1 flex flex-col p-4 gap-4 hidden">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h2 class="font-bold text-base text-slate-100">Pilih Bioskop & Jadwal</h2>
+          <p class="text-xs text-slate-400">Kota: <span id="cinemaCityFilterLabel" class="text-sky-400 font-semibold">BANDUNG</span></p>
+        </div>
+        <div class="text-xs text-slate-400 bg-slate-800 px-2.5 py-1 rounded-md">
+          <i class="fa-solid fa-filter"></i> Filter
+        </div>
+      </div>
+
+      <!-- Date Pills (Screenshot 4) -->
+      <div class="flex gap-2 overflow-x-auto hide-scrollbar py-1">
+        <button class="date-pill px-3 py-2 rounded-xl bg-sky-600 text-slate-950 font-bold text-xs flex flex-col items-center min-w-[70px]">
+          <span class="text-[10px] uppercase font-normal opacity-90">HARI INI</span>
+          <span class="text-sm font-extrabold">10 Nov</span>
+        </button>
+        <button class="date-pill px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex flex-col items-center min-w-[70px] hover:bg-slate-700">
+          <span class="text-[10px] uppercase font-normal text-slate-400">RAB</span>
+          <span class="text-sm font-extrabold">11 Nov</span>
+        </button>
+        <button class="date-pill px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex flex-col items-center min-w-[70px] hover:bg-slate-700">
+          <span class="text-[10px] uppercase font-normal text-slate-400">KAM</span>
+          <span class="text-sm font-extrabold">12 Nov</span>
+        </button>
+        <button class="date-pill px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs flex flex-col items-center min-w-[70px] hover:bg-slate-700">
+          <span class="text-[10px] uppercase font-normal text-slate-400">JUM</span>
+          <span class="text-sm font-extrabold">13 Nov</span>
         </button>
       </div>
-    </div>
-  </header>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-    
-    <!-- Left: Seat Map View -->
-    <div class="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl">
-      <div class="text-center mb-6">
-        <h2 class="text-xl font-bold">Studio 1 — Premiere Hall</h2>
-        <p class="text-xs text-slate-400 mt-1">Pilih kursi yang Anda inginkan pada denah di bawah ini</p>
+      <!-- Cinema Cards List -->
+      <div id="cinemaShowtimeContainer" class="flex flex-col gap-4">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- TAB 3: TIKET SAYA (MY TICKETS - Inspired by Screenshot 5) -->
+    <section id="tabTickets" class="flex-1 flex flex-col p-4 gap-4 hidden">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h2 class="font-bold text-base text-slate-100">Daftar Tiket & Pesanan</h2>
+        <button onclick="fetchActiveBookings()" class="text-xs text-sky-400 font-medium hover:underline flex items-center gap-1">
+          <i class="fa-solid fa-rotate"></i> Refresh
+        </button>
       </div>
 
-      <!-- Cinema Screen -->
-      <div class="my-8 px-8">
-        <div class="screen-curve mb-2"></div>
-        <p class="text-center text-xs tracking-widest text-slate-500 uppercase font-bold">Layar Bioskop / Screen</p>
+      <!-- Sub Tabs: Tiket Aktif vs Riwayat -->
+      <div class="flex border-b border-slate-800 text-xs font-bold text-center">
+        <button class="flex-1 pb-2 border-b-2 border-sky-400 text-sky-400">TIKET AKTIF</button>
+        <button class="flex-1 pb-2 text-slate-500 hover:text-slate-300">DAFTAR TRANSAKSI</button>
       </div>
 
-      <!-- Legend -->
-      <div class="flex flex-wrap justify-center gap-4 text-xs mb-8 p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
-        <div class="flex items-center gap-2">
-          <div class="w-5 h-5 rounded bg-purple-600/30 border border-purple-500 flex items-center justify-center text-[10px]">A</div>
-          <span>Satine Suite (Rp 120k)</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="w-5 h-5 rounded bg-pink-600/30 border border-pink-500 flex items-center justify-center text-[10px]">B</div>
-          <span>Sweet Box (Rp 75k)</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="w-5 h-5 rounded bg-sky-600/30 border border-sky-500 flex items-center justify-center text-[10px]">C-E</div>
-          <span>Reguler (Rp 45k)</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="w-5 h-5 rounded bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></div>
-          <span>Dipilih</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <div class="w-5 h-5 rounded bg-red-950/80 border border-red-800/50 text-red-500 opacity-60 flex items-center justify-center text-[10px]"><i class="fa-solid fa-xmark"></i></div>
-          <span>Terisi / Booked</span>
+      <!-- Category Filter (Film, Makanan, Event) -->
+      <div class="flex gap-2">
+        <button class="px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-400 border border-sky-500/40">Film</button>
+        <button class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400">Makanan</button>
+        <button class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-400">Event</button>
+      </div>
+
+      <!-- Ticket Cards List -->
+      <div id="activeTicketList" class="flex flex-col gap-3 mt-1">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- TAB 4: MAKANAN & MINUMAN (F&B CONCESSIONS) -->
+    <section id="tabFoods" class="flex-1 flex flex-col p-4 gap-4 hidden">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <h2 class="font-bold text-base text-slate-100">Snack & Popcorn XXI</h2>
+          <p class="text-xs text-slate-400">Pesan makanan lebih awal, ambil tanpa antre di counter</p>
         </div>
       </div>
 
-      <!-- Seat Grid Container -->
-      <div id="seatMap" class="flex flex-col gap-3 items-center min-h-[300px] justify-center">
-        <div class="text-slate-500 text-sm animate-pulse">Memuat denah kursi bioskop...</div>
+      <!-- Food Items List -->
+      <div id="foodList" class="grid grid-cols-1 gap-3">
+        <!-- Rendered by JS -->
       </div>
-    </div>
+    </section>
 
-    <!-- Right: Checkout / Booking Panel -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
-      <div>
-        <h3 class="font-bold text-lg pb-3 border-b border-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-ticket text-amber-400"></i> Ringkasan Tiket
-        </h3>
+    <!-- Bottom Navigation Bar (Screenshot 3 & 5) -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 flex justify-center">
+      <div class="w-full max-w-md md:max-w-xl lg:max-w-4xl bg-slate-900/95 backdrop-blur border-t border-slate-800 flex justify-around items-center py-2 px-3">
+        <button onclick="switchTab('home')" id="navHome" class="nav-btn flex flex-col items-center gap-1 text-sky-400">
+          <i class="fa-solid fa-house text-base"></i>
+          <span class="text-[10px] font-bold">Beranda</span>
+        </button>
+        <button onclick="switchTab('cinemas')" id="navCinemas" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-film text-base"></i>
+          <span class="text-[10px] font-bold">Bioskop</span>
+        </button>
+        <button onclick="switchTab('foods')" id="navFoods" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-burger text-base"></i>
+          <span class="text-[10px] font-bold">Makanan</span>
+        </button>
+        <button onclick="switchTab('tickets')" id="navTickets" class="nav-btn flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-ticket text-base"></i>
+          <span class="text-[10px] font-bold">Tiket Saya</span>
+        </button>
+      </div>
+    </nav>
+  </div>
 
-        <!-- Selected Seats Display -->
-        <div class="my-4">
-          <div class="text-xs text-slate-400 mb-1">Kursi yang Dipilih:</div>
-          <div id="selectedSeatsLabel" class="font-mono font-bold text-sky-400 min-h-[24px]">Belum ada kursi dipilih</div>
-        </div>
+  <!-- MODAL 1: PREVIEW FILM & SINOPSIS (Screenshot 1 & 2) -->
+  <div id="movieDetailModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto hide-scrollbar shadow-2xl relative">
+      
+      <!-- Backdrop Image -->
+      <div class="relative h-56 w-full overflow-hidden">
+        <img id="detailBackdrop" src="" alt="Backdrop" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+        <button onclick="closeMovieDetail()" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-slate-950/70 border border-slate-700 text-white flex items-center justify-center text-sm">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      </div>
 
-        <div class="my-4 p-4 rounded-xl bg-slate-950/80 border border-slate-800">
-          <div class="flex justify-between text-sm mb-1 text-slate-400">
-            <span>Jumlah Tiket:</span>
-            <span id="ticketCount" class="font-bold text-slate-200">0</span>
-          </div>
-          <div class="flex justify-between text-base font-bold text-slate-100 pt-2 border-t border-slate-800">
-            <span>Total Tagihan:</span>
-            <span id="totalAmount" class="text-amber-400">Rp 0</span>
-          </div>
-        </div>
-
-        <!-- Form Input -->
-        <div class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Pembeli <span class="text-rose-400">*</span></label>
-            <input type="text" id="custName" placeholder="Contoh: Budi Santoso" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500 text-slate-100">
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Metode Pembayaran (Strategy Pattern)</label>
-            <div class="grid grid-cols-2 gap-2">
-              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-950 cursor-pointer has-[:checked]:border-sky-500 has-[:checked]:bg-sky-950/30">
-                <input type="radio" name="payMethod" value="CASH" checked onchange="togglePayInput()" class="text-sky-500">
-                <span class="text-xs font-medium"><i class="fa-solid fa-money-bill-wave text-emerald-400"></i> Cash Loket</span>
-              </label>
-              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-950 cursor-pointer has-[:checked]:border-sky-500 has-[:checked]:bg-sky-950/30">
-                <input type="radio" name="payMethod" value="QRIS" onchange="togglePayInput()" class="text-sky-500">
-                <span class="text-xs font-medium"><i class="fa-solid fa-qrcode text-purple-400"></i> QRIS Online</span>
-              </label>
+      <div class="p-5 -mt-8 relative z-10">
+        <div class="flex gap-4">
+          <img id="detailPoster" src="" alt="Poster" class="w-24 h-36 rounded-xl object-cover shadow-2xl border border-slate-700 flex-shrink-0 -mt-10">
+          <div class="flex-1">
+            <span id="detailBadge" class="text-[10px] font-bold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md uppercase">TOP 1</span>
+            <h2 id="detailTitle" class="text-lg font-black text-white mt-1 leading-snug">Movie Title</h2>
+            <div id="detailGenre" class="text-xs text-sky-400 font-medium mt-0.5">Action, Sci-Fi</div>
+            <div class="flex items-center gap-2 mt-2 text-[11px] text-slate-300">
+              <span id="detailAge" class="border border-slate-700 px-1.5 py-0.5 rounded bg-slate-800 font-bold">13+</span>
+              <span id="detailDuration"><i class="fa-regular fa-clock text-slate-400"></i> 125 min</span>
             </div>
           </div>
+        </div>
 
+        <!-- Rating Badges (Screenshot 1) -->
+        <div class="grid grid-cols-3 gap-2 my-4 p-3 rounded-2xl bg-slate-950/80 border border-slate-800/90 text-center">
           <div>
-            <label id="paymentAmountLabel" class="block text-xs font-semibold text-slate-300 mb-1">Uang Dibayarkan (Cash)</label>
-            <input type="number" id="payAmount" placeholder="Nominal uang" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500 text-slate-100">
-            <span id="qrisNote" class="text-[11px] text-purple-400 hidden mt-1 block"><i class="fa-solid fa-info-circle"></i> Pembayaran QRIS otomatis menggunakan nominal presisi total tagihan.</span>
+            <div class="text-[10px] text-slate-400 font-semibold">IMDb</div>
+            <div id="detailImdb" class="text-xs font-bold text-amber-400 mt-0.5">8.3/10</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 font-semibold">Rotten Tomatoes</div>
+            <div id="detailRotten" class="text-xs font-bold text-rose-400 mt-0.5">98%</div>
+          </div>
+          <div>
+            <div class="text-[10px] text-slate-400 font-semibold">Match</div>
+            <div class="text-xs font-bold text-emerald-400 mt-0.5">94%</div>
           </div>
         </div>
-      </div>
 
-      <div class="mt-6 pt-4 border-t border-slate-800">
-        <button id="btnSubmit" onclick="submitBooking()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-slate-950 font-bold transition shadow-lg shadow-rose-900/30 flex items-center justify-center gap-2">
-          <i class="fa-solid fa-circle-check"></i> Konfirmasi Pembelian Tiket
-        </button>
+        <!-- Synopsis -->
+        <div>
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Sinopsis</h4>
+          <p id="detailSynopsis" class="text-xs text-slate-400 leading-relaxed">Synopsis description...</p>
+        </div>
+
+        <!-- Action CTA -->
+        <div class="mt-6 pt-3 border-t border-slate-800 flex gap-3">
+          <button id="btnWatchTrailer" onclick="watchTrailer()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1.5">
+            <i class="fa-solid fa-play text-rose-500"></i> Trailer
+          </button>
+          <button onclick="goToScheduleFromMovie()" class="flex-1 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-sky-500/20">
+            <i class="fa-solid fa-ticket"></i> Beli Tiket Nonton
+          </button>
+        </div>
       </div>
     </div>
-  </main>
+  </div>
 
-  <!-- Modal Konfirmasi / Tiket Digital -->
-  <div id="ticketModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-      <div class="text-center pb-4 border-b border-slate-800">
-        <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
-          <i class="fa-solid fa-ticket"></i>
+  <!-- MODAL 2: SEAT SELECTION & SEAT HOLD WITH COUNTDOWN (Screenshot 1) -->
+  <div id="seatModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col justify-between p-4 overflow-y-auto hide-scrollbar">
+    <div class="max-w-md w-full mx-auto">
+      
+      <!-- Seat Header -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <button onclick="closeSeatModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="text-center">
+          <h3 id="seatModalMovieTitle" class="font-bold text-sm text-white">Movie Title</h3>
+          <p id="seatModalCinemaInfo" class="text-[11px] text-slate-400">CGV 23 Paskal • Reguler 2D • 15:15</p>
         </div>
-        <h3 class="font-bold text-lg">Tiket Digital Berhasil Terbit!</h3>
-        <p class="text-xs text-slate-400">Tunjukkan bukti digital ini saat memasuki pintu teater</p>
+        <div class="w-8"></div>
       </div>
 
-      <div class="my-5 space-y-3 text-xs bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-        <div class="flex justify-between">
-          <span class="text-slate-400">Kode Booking:</span>
-          <span id="resCode" class="font-mono font-bold text-amber-400"></span>
+      <!-- Curved Screen -->
+      <div class="my-6 px-4">
+        <div class="screen-curve mb-2"></div>
+        <p class="text-center text-[10px] tracking-widest text-slate-500 uppercase font-bold">Layar Bioskop / Screen</p>
+      </div>
+
+      <!-- Seat Legend with HELD / Abu-abu state -->
+      <div class="flex flex-wrap justify-center gap-3 text-[10px] mb-6 p-2.5 bg-slate-900 rounded-xl border border-slate-800">
+        <div class="flex items-center gap-1.5">
+          <div class="w-4 h-4 rounded bg-sky-600/30 border border-sky-500"></div>
+          <span>Tersedia</span>
         </div>
-        <div class="flex justify-between">
-          <span class="text-slate-400">Nama Pembeli:</span>
-          <span id="resName" class="font-semibold text-slate-200"></span>
+        <div class="flex items-center gap-1.5">
+          <div class="w-4 h-4 rounded bg-amber-500"></div>
+          <span>Pilihan Anda</span>
         </div>
-        <div class="flex justify-between">
-          <span class="text-slate-400">Kursi:</span>
-          <span id="resSeats" class="font-semibold text-sky-400"></span>
+        <div class="flex items-center gap-1.5">
+          <div class="w-4 h-4 rounded bg-slate-700 border border-slate-600 text-slate-400 flex items-center justify-center text-[8px]"><i class="fa-solid fa-lock"></i></div>
+          <span>Sedang Bayar (Abu-abu)</span>
         </div>
-        <div class="flex justify-between">
-          <span class="text-slate-400">Metode Bayar:</span>
-          <span id="resMethod" class="font-semibold text-slate-200"></span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-400">Total Biaya:</span>
-          <span id="resTotal" class="font-semibold text-slate-200"></span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-400">Uang Dibayar:</span>
-          <span id="resPaid" class="font-semibold text-slate-200"></span>
-        </div>
-        <div class="flex justify-between pt-2 border-t border-slate-800">
-          <span class="text-slate-400">Kembalian:</span>
-          <span id="resChange" class="font-bold text-emerald-400"></span>
+        <div class="flex items-center gap-1.5">
+          <div class="w-4 h-4 rounded bg-red-950 border border-red-800/60 text-red-500 flex items-center justify-center text-[8px]"><i class="fa-solid fa-xmark"></i></div>
+          <span>Terjual</span>
         </div>
       </div>
 
-      <button onclick="closeModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold transition">
-        Tutup
+      <!-- Interactive Seat Layout -->
+      <div id="showtimeSeatMap" class="flex flex-col gap-2.5 items-center justify-center min-h-[220px]">
+        <!-- Seats generated here -->
+      </div>
+    </div>
+
+    <!-- Bottom Bar: Total & Proceed Button -->
+    <div class="max-w-md w-full mx-auto mt-6 p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl">
+      <div class="flex justify-between items-center mb-3 text-xs">
+        <div>
+          <span class="text-slate-400">Kursi Dipilih: </span>
+          <span id="selectedSeatsCodes" class="font-bold text-sky-400 font-mono">-</span>
+        </div>
+        <div>
+          <span class="text-slate-400">Total Tiket: </span>
+          <span id="selectedSeatsTotal" class="font-bold text-amber-400 font-mono">Rp 0</span>
+        </div>
+      </div>
+      <button id="btnProceedToCheckout" onclick="proceedToCheckoutWithHold()" class="w-full py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
+        <i class="fa-solid fa-lock"></i> Kunci Kursi &amp; Lanjut Pembayaran
       </button>
     </div>
   </div>
 
-  <script>
-    let allSeats = [];
-    let selectedSeats = new Map(); // seatCode -> price
+  <!-- MODAL 3: PAYMENT & F&B CHECKOUT WITH TIMER -->
+  <div id="checkoutModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex flex-col justify-between p-4 overflow-y-auto hide-scrollbar">
+    <div class="max-w-md w-full mx-auto space-y-4">
+      
+      <!-- Checkout Header with TTL Countdown Timer -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <button onclick="closeCheckoutModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="text-center">
+          <h3 class="font-bold text-sm text-white">Konfirmasi &amp; Pembayaran</h3>
+          <p class="text-[11px] text-amber-400 font-mono flex items-center justify-center gap-1">
+            <i class="fa-regular fa-clock animate-pulse"></i> Selesaikan dalam: <span id="holdTimer">05:00</span>
+          </p>
+        </div>
+        <div class="w-8"></div>
+      </div>
 
-    async function fetchSeats() {
+      <!-- Order Summary Card -->
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-2 text-xs">
+        <div class="flex justify-between text-slate-300">
+          <span id="checkoutMovieTitle" class="font-bold text-white">Movie Title</span>
+          <span id="checkoutStudio" class="text-sky-400">Studio 1</span>
+        </div>
+        <div class="flex justify-between text-slate-400">
+          <span id="checkoutCinemaName">CGV 23 Paskal</span>
+          <span id="checkoutSeats" class="font-mono font-bold text-white">Kursi C1, C2</span>
+        </div>
+        <div class="flex justify-between pt-2 border-t border-slate-800">
+          <span class="text-slate-400">Subtotal Tiket:</span>
+          <span id="checkoutTicketAmount" class="font-bold text-slate-200">Rp 90.000</span>
+        </div>
+      </div>
+
+      <!-- Add F&B Snacks Section -->
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+            <i class="fa-solid fa-burger text-amber-400"></i> Tambah Camilan Popcorn?
+          </h4>
+          <span id="fnbTotalLabel" class="text-xs font-bold text-amber-400 font-mono">+ Rp 0</span>
+        </div>
+        <div id="checkoutFnbContainer" class="flex flex-col gap-2 max-h-36 overflow-y-auto hide-scrollbar">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Customer Name & Payment Method -->
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Nama Pembeli</label>
+          <input type="text" id="checkoutCustName" value="Randi Pratama" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">Pilih Metode Pembayaran</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-950 cursor-pointer has-[:checked]:border-sky-500 has-[:checked]:bg-sky-950/40">
+              <input type="radio" name="checkoutPayMethod" value="CASH" checked onchange="toggleCheckoutPaymentInput()" class="text-sky-500">
+              <span class="text-xs font-medium"><i class="fa-solid fa-money-bill-wave text-emerald-400"></i> Cash Loket</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-700 bg-slate-950 cursor-pointer has-[:checked]:border-sky-500 has-[:checked]:bg-sky-950/40">
+              <input type="radio" name="checkoutPayMethod" value="QRIS" onchange="toggleCheckoutPaymentInput()" class="text-sky-500">
+              <span class="text-xs font-medium"><i class="fa-solid fa-qrcode text-purple-400"></i> QRIS Online</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label id="checkoutPayAmountLabel" class="block text-[11px] font-semibold text-slate-300 mb-1">Uang Dibayarkan (Cash)</label>
+          <input type="number" id="checkoutPayAmountInput" placeholder="Masukkan uang pembeli" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-sky-500 font-mono">
+        </div>
+      </div>
+
+      <!-- Grand Total Bar -->
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 border border-indigo-500/30">
+        <div class="flex justify-between items-center">
+          <div>
+            <span class="text-[11px] text-slate-400">Total Pembayaran:</span>
+            <div id="checkoutGrandTotal" class="text-lg font-black text-amber-400 font-mono">Rp 90.000</div>
+          </div>
+          <button onclick="executePayment()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-check"></i> Bayar Sekarang
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: DIGITAL TICKET & PICKUP CODE MODAL (Screenshot 5) -->
+  <div id="ticketDetailModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative print-animation">
+      
+      <div class="text-center pb-4 border-b border-slate-800">
+        <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+          <i class="fa-solid fa-ticket"></i>
+        </div>
+        <h3 class="font-extrabold text-base text-white">E-Ticket Bioskop Terbit!</h3>
+        <p class="text-[11px] text-slate-400">Gunakan Barcode atau PIN Klaim untuk cetak tiket di Kiosk</p>
+      </div>
+
+      <!-- Ticket Body -->
+      <div class="my-4 space-y-3 bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs">
+        <div class="flex justify-between">
+          <span class="text-slate-400">Film:</span>
+          <span id="ticketMovie" class="font-bold text-white text-right">Godzilla Minus One</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Bioskop &amp; Studio:</span>
+          <span id="ticketCinema" class="font-semibold text-slate-200 text-right">CGV 23 Paskal • Reguler 2D</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Jadwal:</span>
+          <span id="ticketTime" class="font-semibold text-slate-200">10 Nov • 15:15</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Kursi:</span>
+          <span id="ticketSeats" class="font-mono font-bold text-sky-400 text-sm">C1, C2</span>
+        </div>
+        <div class="flex justify-between pt-2 border-t border-slate-800">
+          <span class="text-slate-400">Makanan / F&amp;B:</span>
+          <span id="ticketFnb" class="font-semibold text-amber-300 text-right">Popcorn Caramel x1</span>
+        </div>
+        
+        <!-- Random PIN / Claim Code (Requested by user) -->
+        <div class="pt-2 border-t border-dashed border-slate-800 flex flex-col items-center justify-center bg-slate-900/60 p-3 rounded-xl mt-2">
+          <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">PIN / Kode Klaim Kiosk</span>
+          <span id="ticketClaimCode" class="text-xl font-black font-mono tracking-widest text-amber-400 my-1">CLM-492182</span>
+          
+          <!-- Barcode simulation -->
+          <div class="w-full flex items-center justify-center gap-1 mt-2 opacity-80 h-10 px-4 bg-white rounded p-1">
+            <div class="w-1 h-8 bg-slate-950"></div><div class="w-2 h-8 bg-slate-950"></div><div class="w-0.5 h-8 bg-slate-950"></div>
+            <div class="w-1.5 h-8 bg-slate-950"></div><div class="w-3 h-8 bg-slate-950"></div><div class="w-0.5 h-8 bg-slate-950"></div>
+            <div class="w-2 h-8 bg-slate-950"></div><div class="w-1 h-8 bg-slate-950"></div><div class="w-2.5 h-8 bg-slate-950"></div>
+            <div class="w-0.5 h-8 bg-slate-950"></div><div class="w-2 h-8 bg-slate-950"></div><div class="w-1.5 h-8 bg-slate-950"></div>
+            <div class="w-1 h-8 bg-slate-950"></div><div class="w-3 h-8 bg-slate-950"></div><div class="w-1 h-8 bg-slate-950"></div>
+          </div>
+          <span id="ticketBarcodeText" class="text-[9px] font-mono text-slate-400 mt-1">TIX-20261110-8492</span>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="openKioskWithCode()" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-print"></i> Simulasi Cetak Kiosk
+        </button>
+        <button onclick="closeTicketDetailModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: SIMULATOR MESIN KIOSK MANDIRI BIOSKOP -->
+  <div id="kioskModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-amber-500/50 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
+      <div class="text-center pb-3 border-b border-slate-800">
+        <div class="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black uppercase tracking-wider mb-1">
+          CineMax Self-Ticketing Kiosk
+        </div>
+        <h3 class="font-bold text-sm text-white">Mesin Cetak Tiket Mandiri</h3>
+        <p class="text-[11px] text-slate-400">Ketik 6-Digit PIN / Kode Klaim Anda untuk cetak fisik</p>
+      </div>
+
+      <div class="my-4 space-y-3">
+        <div class="relative">
+          <input type="text" id="kioskCodeInput" placeholder="Contoh: CLM-492182" class="w-full text-center tracking-widest font-mono font-black text-base bg-slate-950 border-2 border-slate-700 rounded-xl py-3 text-amber-400 focus:outline-none focus:border-amber-500 uppercase">
+        </div>
+        
+        <button onclick="submitKioskClaim()" class="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-print text-sm"></i> Cetak Tiket Fisik
+        </button>
+
+        <!-- Thermal Paper Print Simulation Result -->
+        <div id="kioskPrintResult" class="hidden mt-4 p-4 rounded-xl bg-white text-slate-950 font-mono text-[11px] space-y-2 border-t-4 border-dashed border-slate-400 print-animation shadow-2xl">
+          <div class="text-center font-bold text-sm border-b pb-1">CINEMAX XXI PREMIERE</div>
+          <div class="flex justify-between text-[10px]">
+            <span id="kioskPrintMovie">GODZILLA MINUS ONE</span>
+            <span id="kioskPrintStudio">STUDIO 1</span>
+          </div>
+          <div class="flex justify-between text-[10px]">
+            <span>SEAT: <b id="kioskPrintSeat" class="text-xs">C1, C2</b></span>
+            <span id="kioskPrintTime">15:15</span>
+          </div>
+          <div class="text-center border-t border-dashed pt-1 text-[9px] text-slate-600">
+            *** SELAMAT MENONTON ***<br>TIKET FISIK RESMI TELAH DICETAK
+          </div>
+        </div>
+      </div>
+
+      <button onclick="closeKioskModal()" class="w-full py-2 rounded-xl bg-slate-800 text-xs font-semibold mt-2">
+        Tutup Kiosk
+      </button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // State Application
+    let currentCity = 'BANDUNG';
+    let currentBrand = 'ALL';
+    let movies = [];
+    let cinemas = [];
+    let foods = [];
+    let activeBookings = [];
+    
+    // Active Selection State
+    let selectedMovie = null;
+    let selectedShowtime = null;
+    let selectedSeats = new Map(); // seatCode -> price
+    let selectedFnb = new Map(); // foodId -> qty
+    let currentHoldTimerInterval = null;
+    let currentClaimedTicket = null;
+
+    // 1. Initial Load & Micro-interaction Loader
+    window.addEventListener('DOMContentLoaded', async () => {
+      const progressBar = document.getElementById('splashProgress');
+      progressBar.style.width = '60%';
+      
+      await Promise.all([
+        fetchMovies(),
+        fetchCinemas(),
+        fetchFoods(),
+        fetchActiveBookings()
+      ]);
+
+      progressBar.style.width = '100%';
+      setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        splash.style.opacity = '0';
+        setTimeout(() => splash.classList.add('hidden'), 700);
+      }, 400);
+    });
+
+    // 2. Fetch Data from REST API Backend
+    async function fetchMovies() {
       try {
-        const res = await fetch('/api/seats');
+        const res = await fetch('/api/movies');
         const json = await res.json();
         if (json.success) {
-          allSeats = json.data;
-          renderSeats();
+          movies = json.data;
+          renderNowShowing();
         }
-      } catch (err) {
-        document.getElementById('seatMap').innerHTML = 
-          `<div class="text-rose-400 text-xs">Gagal menghubungi server backend. Pastikan Spring Boot aktif.</div>`;
+
+        const resComing = await fetch('/api/movies/coming-soon');
+        const jsonComing = await resComing.json();
+        if (jsonComing.success) {
+          renderComingSoon(jsonComing.data);
+        }
+      } catch (e) {
+        console.error("Gagal load film", e);
       }
     }
 
-    function renderSeats() {
-      const container = document.getElementById('seatMap');
+    async function fetchCinemas() {
+      try {
+        const res = await fetch(`/api/cinemas?city=${currentCity}`);
+        const json = await res.json();
+        if (json.success) {
+          cinemas = json.data;
+          renderCinemaShowtimes();
+        }
+      } catch (e) {
+        console.error("Gagal load bioskop", e);
+      }
+    }
+
+    async function fetchFoods() {
+      try {
+        const res = await fetch('/api/foods');
+        const json = await res.json();
+        if (json.success) {
+          foods = json.data;
+          renderFoodTab();
+        }
+      } catch (e) {
+        console.error("Gagal load makanan", e);
+      }
+    }
+
+    async function fetchActiveBookings() {
+      try {
+        const res = await fetch('/api/v2/bookings');
+        const json = await res.json();
+        if (json.success) {
+          activeBookings = json.data;
+          renderActiveTickets();
+        }
+      } catch (e) {
+        console.error("Gagal load tiket", e);
+      }
+    }
+
+    // 3. Render Now Showing Movies (Screenshot 1 & 3)
+    function renderNowShowing() {
+      const container = document.getElementById('nowShowingList');
       container.innerHTML = '';
 
-      // Group seats by row
-      const rows = {};
-      allSeats.forEach(s => {
-        if (!rows[s.seatRow]) rows[s.seatRow] = [];
-        rows[s.seatRow].push(s);
-      });
+      movies.forEach(movie => {
+        const card = document.createElement('div');
+        card.className = 'group cursor-pointer rounded-2xl bg-slate-900 border border-slate-800 hover:border-sky-500/50 transition overflow-hidden shadow-lg';
+        card.onclick = () => openMovieDetail(movie);
 
-      Object.keys(rows).sort().forEach(rowKey => {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'flex items-center gap-2';
-
-        const rowLabel = document.createElement('div');
-        rowLabel.className = 'w-6 text-center font-bold text-xs text-slate-400';
-        rowLabel.innerText = rowKey;
-        rowDiv.appendChild(rowLabel);
-
-        const seatsContainer = document.createElement('div');
-        seatsContainer.className = 'flex gap-2';
-
-        rows[rowKey].forEach(seat => {
-          const btn = document.createElement('button');
-          btn.id = `btn-seat-${seat.seatCode}`;
-          
-          let tierColor = 'border-sky-500/60 bg-sky-600/20 text-sky-300';
-          if (seat.tier === 'SATINE_SUITE') tierColor = 'border-purple-500/60 bg-purple-600/20 text-purple-300';
-          if (seat.tier === 'SWEET_BOX') tierColor = 'border-pink-500/60 bg-pink-600/20 text-pink-300';
-
-          if (!seat.available) {
-            btn.className = 'w-9 h-9 rounded-lg border border-red-900/40 bg-red-950/40 text-red-500 opacity-40 cursor-not-allowed text-xs font-semibold flex items-center justify-center';
-            btn.innerHTML = '<i class="fa-solid fa-xmark text-[10px]"></i>';
-            btn.disabled = true;
-          } else if (selectedSeats.has(seat.seatCode)) {
-            btn.className = 'w-9 h-9 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs flex items-center justify-center shadow-lg shadow-amber-500/30';
-            btn.innerText = seat.seatCode;
-            btn.onclick = () => toggleSeat(seat);
-          } else {
-            btn.className = `w-9 h-9 rounded-lg border ${tierColor} hover:scale-105 active:scale-95 transition text-xs font-semibold flex items-center justify-center`;
-            btn.innerText = seat.seatCode;
-            btn.onclick = () => toggleSeat(seat);
-          }
-
-          seatsContainer.appendChild(btn);
-        });
-
-        rowDiv.appendChild(seatsContainer);
-        container.appendChild(rowDiv);
+        card.innerHTML = `
+          <div class="relative aspect-[2/3] overflow-hidden bg-slate-950">
+            <img src="${movie.posterUrl}" alt="${movie.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            ${movie.rankBadge ? `<div class="absolute top-2 left-2 w-6 h-6 rounded-full bg-slate-950/80 backdrop-blur border border-amber-400 text-amber-400 font-black text-[11px] flex items-center justify-center">${movie.rankBadge}</div>` : ''}
+            <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-slate-950/80 backdrop-blur text-[10px] font-bold text-amber-400 border border-slate-800">
+              <i class="fa-solid fa-star text-[9px]"></i> ${movie.imdbRating}
+            </div>
+          </div>
+          <div class="p-2.5">
+            <h3 class="font-bold text-xs text-white truncate">${movie.title}</h3>
+            <div class="flex items-center justify-between mt-1 text-[10px] text-slate-400">
+              <span>${movie.ageRating} • ${movie.durationMinutes}m</span>
+              <span class="text-sky-400 font-semibold">${movie.genre.split(',')[0]}</span>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
       });
     }
 
-    function toggleSeat(seat) {
+    function renderComingSoon(comingMovies) {
+      const container = document.getElementById('comingSoonList');
+      container.innerHTML = '';
+
+      comingMovies.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'min-w-[130px] rounded-xl overflow-hidden bg-slate-900 border border-slate-800 flex-shrink-0 cursor-pointer';
+        item.onclick = () => openMovieDetail(m);
+        item.innerHTML = `
+          <img src="${m.posterUrl}" alt="${m.title}" class="w-full h-36 object-cover">
+          <div class="p-2">
+            <h4 class="font-bold text-[11px] text-white truncate">${m.title}</h4>
+            <span class="text-[9px] text-slate-400 block">${m.durationMinutes} min</span>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // 4. Movie Detail View (Screenshot 1 & 2)
+    function openMovieDetail(movie) {
+      selectedMovie = movie;
+      document.getElementById('detailTitle').innerText = movie.title;
+      document.getElementById('detailGenre').innerText = movie.genre;
+      document.getElementById('detailAge').innerText = movie.ageRating;
+      document.getElementById('detailDuration').innerText = `${movie.durationMinutes} menit`;
+      document.getElementById('detailSynopsis').innerText = movie.synopsis;
+      document.getElementById('detailImdb').innerText = movie.imdbRating;
+      document.getElementById('detailRotten').innerText = movie.rottenScore;
+      document.getElementById('detailPoster').src = movie.posterUrl;
+      document.getElementById('detailBackdrop').src = movie.backdropUrl || movie.posterUrl;
+      document.getElementById('detailBadge').innerText = movie.rankBadge ? `TOP #${movie.rankBadge}` : 'NOW SHOWING';
+      
+      document.getElementById('movieDetailModal').classList.remove('hidden');
+    }
+
+    function closeMovieDetail() {
+      document.getElementById('movieDetailModal').classList.add('hidden');
+    }
+
+    function watchTrailer() {
+      if (selectedMovie && selectedMovie.trailerUrl) {
+        window.open(selectedMovie.trailerUrl, '_blank');
+      }
+    }
+
+    function goToScheduleFromMovie() {
+      closeMovieDetail();
+      switchTab('cinemas');
+    }
+
+    // 5. Cinema & Showtimes (Screenshot 4)
+    async function renderCinemaShowtimes() {
+      const container = document.getElementById('cinemaShowtimeContainer');
+      container.innerHTML = '';
+
+      // Default pick movie 1 if none chosen
+      const activeMovie = selectedMovie || movies[0];
+      if (!activeMovie) return;
+
+      for (const cinema of cinemas) {
+        // Fetch showtimes for this cinema & movie
+        const res = await fetch(`/api/cinemas/showtimes?movieId=${activeMovie.id}&cinemaId=${cinema.id}`);
+        const json = await res.json();
+        const showtimes = json.data || [];
+
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3';
+
+        // Group showtimes by studio type
+        const studioGroups = {};
+        showtimes.forEach(st => {
+          if (!studioGroups[st.studioType]) studioGroups[st.studioType] = [];
+          studioGroups[st.studioType].push(st);
+        });
+
+        let studiosHtml = '';
+        if (Object.keys(studioGroups).length === 0) {
+          studiosHtml = `<div class="text-xs text-slate-500 py-1">Jadwal hari ini belum tersedia di bioskop ini.</div>`;
+        } else {
+          for (const type of Object.keys(studioGroups)) {
+            const list = studioGroups[type];
+            const price = Number(list[0].price).toLocaleString('id-ID');
+            studiosHtml += `
+              <div class="pt-2 border-t border-slate-800/80">
+                <div class="flex justify-between items-center text-xs mb-2">
+                  <span class="font-bold text-slate-200">${type}</span>
+                  <span class="font-mono text-slate-400">Rp ${price}</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  ${list.map(st => `
+                    <button onclick="openSeatSelection(${st.id}, '${activeMovie.title}', '${cinema.name}', '${type}', '${st.startTime}')" class="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-950 hover:border-sky-500 hover:text-sky-400 font-mono text-xs font-bold transition">
+                      ${st.startTime}
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="flex items-center gap-1.5">
+                <i class="fa-regular fa-star text-amber-400 text-xs"></i>
+                <h3 class="font-bold text-xs text-white">${cinema.name}</h3>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5">${cinema.address}</p>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">${cinema.brand}</span>
+          </div>
+          ${studiosHtml}
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    // 6. Interactive Seat Selection with SEAT HOLD (Grey state while in payment)
+    async function openSeatSelection(showtimeId, movieTitle, cinemaName, studioType, startTime) {
+      selectedShowtime = { id: showtimeId, movieTitle, cinemaName, studioType, startTime };
+      selectedSeats.clear();
+
+      document.getElementById('seatModalMovieTitle').innerText = movieTitle;
+      document.getElementById('seatModalCinemaInfo').innerText = `${cinemaName} • ${studioType} • ${startTime}`;
+      document.getElementById('selectedSeatsCodes').innerText = '-';
+      document.getElementById('selectedSeatsTotal').innerText = 'Rp 0';
+
+      await loadShowtimeSeats(showtimeId);
+      document.getElementById('seatModal').classList.remove('hidden');
+    }
+
+    async function loadShowtimeSeats(showtimeId) {
+      const container = document.getElementById('showtimeSeatMap');
+      container.innerHTML = '<div class="text-xs text-slate-400 animate-pulse">Memuat denah kursi...</div>';
+
+      try {
+        const res = await fetch(`/api/showtimes/${showtimeId}/seats`);
+        const json = await res.json();
+        const seats = json.data || [];
+        container.innerHTML = '';
+
+        // Group seats by row (A..E)
+        const rows = {};
+        seats.forEach(s => {
+          if (!rows[s.seatRow]) rows[s.seatRow] = [];
+          rows[s.seatRow].push(s);
+        });
+
+        Object.keys(rows).sort().forEach(rowKey => {
+          const rowDiv = document.createElement('div');
+          rowDiv.className = 'flex items-center gap-2';
+
+          const rowLabel = document.createElement('div');
+          rowLabel.className = 'w-5 text-center font-bold text-xs text-slate-500';
+          rowLabel.innerText = rowKey;
+          rowDiv.appendChild(rowLabel);
+
+          const seatsContainer = document.createElement('div');
+          seatsContainer.className = 'flex gap-1.5';
+
+          rows[rowKey].forEach(seat => {
+            const btn = document.createElement('button');
+            const isSelected = selectedSeats.has(seat.seatCode);
+
+            // Determine status: BOOKED, HELD (Abu-abu), or AVAILABLE
+            if (seat.status === 'BOOKED') {
+              btn.className = 'w-7 h-7 rounded-md bg-red-950/60 border border-red-800/40 text-red-500 opacity-50 cursor-not-allowed text-[10px] flex items-center justify-center';
+              btn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+              btn.disabled = true;
+            } else if (seat.status === 'HELD') {
+              // Grey color with lock icon (requested by user)
+              btn.className = 'w-7 h-7 rounded-md bg-slate-700/80 border border-slate-600 text-slate-400 cursor-not-allowed text-[10px] flex items-center justify-center shadow';
+              btn.innerHTML = '<i class="fa-solid fa-lock text-[8px]"></i>';
+              btn.title = 'Sedang dalam proses pembayaran oleh pembeli lain';
+              btn.disabled = true;
+            } else if (isSelected) {
+              btn.className = 'w-7 h-7 rounded-md bg-amber-500 text-slate-950 font-bold text-[10px] flex items-center justify-center shadow-md shadow-amber-500/30 scale-105';
+              btn.innerText = seat.seatCode;
+              btn.onclick = () => toggleShowtimeSeat(seat);
+            } else {
+              let tierColor = 'border-sky-500/40 bg-sky-950/40 text-sky-300 hover:border-sky-400';
+              if (seat.tier === 'SATINE_SUITE') tierColor = 'border-purple-500/40 bg-purple-950/40 text-purple-300';
+              if (seat.tier === 'SWEET_BOX') tierColor = 'border-pink-500/40 bg-pink-950/40 text-pink-300';
+
+              btn.className = `w-7 h-7 rounded-md border ${tierColor} transition text-[10px] font-bold flex items-center justify-center active:scale-95`;
+              btn.innerText = seat.seatCode;
+              btn.onclick = () => toggleShowtimeSeat(seat);
+            }
+
+            seatsContainer.appendChild(btn);
+          });
+
+          rowDiv.appendChild(seatsContainer);
+          container.appendChild(rowDiv);
+        });
+
+      } catch (e) {
+        container.innerHTML = '<div class="text-xs text-rose-400">Gagal memuat kursi.</div>';
+      }
+    }
+
+    function toggleShowtimeSeat(seat) {
       if (selectedSeats.has(seat.seatCode)) {
         selectedSeats.delete(seat.seatCode);
       } else {
         selectedSeats.set(seat.seatCode, seat.price);
       }
-      updateSummary();
-      renderSeats();
-    }
-
-    function updateSummary() {
-      const label = document.getElementById('selectedSeatsLabel');
-      const count = document.getElementById('ticketCount');
-      const total = document.getElementById('totalAmount');
-      const payInput = document.getElementById('payAmount');
-
-      if (selectedSeats.size === 0) {
-        label.innerText = 'Belum ada kursi dipilih';
-        count.innerText = '0';
-        total.innerText = 'Rp 0';
-        if (getPayMethod() === 'QRIS') payInput.value = '';
-        return;
-      }
 
       const codes = Array.from(selectedSeats.keys());
-      label.innerText = codes.join(', ');
-      count.innerText = codes.length;
+      document.getElementById('selectedSeatsCodes').innerText = codes.length > 0 ? codes.join(', ') : '-';
+      
+      let total = 0;
+      selectedSeats.forEach(p => total += p);
+      document.getElementById('selectedSeatsTotal').innerText = 'Rp ' + total.toLocaleString('id-ID');
 
-      let sum = 0;
-      selectedSeats.forEach(price => sum += price);
-      total.innerText = 'Rp ' + sum.toLocaleString('id-ID');
-
-      if (getPayMethod() === 'QRIS') {
-        payInput.value = sum;
-      }
+      loadShowtimeSeats(selectedShowtime.id);
     }
 
-    function getPayMethod() {
-      return document.querySelector('input[name="payMethod"]:checked').value;
+    function closeSeatModal() {
+      document.getElementById('seatModal').classList.add('hidden');
     }
 
-    function togglePayInput() {
-      const method = getPayMethod();
-      const payInput = document.getElementById('payAmount');
-      const label = document.getElementById('paymentAmountLabel');
-      const qrisNote = document.getElementById('qrisNote');
-
-      if (method === 'QRIS') {
-        let sum = 0;
-        selectedSeats.forEach(price => sum += price);
-        payInput.value = sum;
-        payInput.readOnly = true;
-        label.innerText = 'Nominal QRIS (Otomatis Pas)';
-        qrisNote.classList.remove('hidden');
-      } else {
-        payInput.readOnly = false;
-        payInput.value = '';
-        label.innerText = 'Uang Dibayarkan (Cash)';
-        qrisNote.classList.add('hidden');
-      }
-    }
-
-    async function submitBooking() {
-      const name = document.getElementById('custName').value.trim();
-      const seatCodes = Array.from(selectedSeats.keys());
-      const method = getPayMethod();
-      const payAmount = parseFloat(document.getElementById('payAmount').value);
-
-      if (!name) {
-        alert('Silakan masukkan nama pembeli!');
+    // 7. Proceed to Checkout: Hold seats (turns grey on other screens) and start 5 min timer
+    async function proceedToCheckoutWithHold() {
+      if (selectedSeats.size === 0) {
+        alert('Pilih minimal 1 kursi terlebih dahulu!');
         return;
       }
-      if (seatCodes.length === 0) {
-        alert('Pilih minimal 1 kursi!');
+
+      const seatCodes = Array.from(selectedSeats.keys());
+      const custName = document.getElementById('checkoutCustName').value.trim();
+
+      try {
+        // Hold seats via API (status becomes HELD / abu-abu)
+        const res = await fetch(`/api/showtimes/${selectedShowtime.id}/hold`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            showtimeId: selectedShowtime.id,
+            seatCodes: seatCodes,
+            customerName: custName
+          })
+        });
+
+        const json = await res.json();
+        if (!json.success) {
+          alert('Gagal mengunci kursi: ' + json.message);
+          return;
+        }
+
+        // Open checkout modal
+        closeSeatModal();
+        openCheckoutModal();
+      } catch (e) {
+        alert('Terjadi kesalahan saat menahan kursi.');
+      }
+    }
+
+    // 8. Checkout Modal & Countdown Timer (5 Minutes)
+    function openCheckoutModal() {
+      document.getElementById('checkoutMovieTitle').innerText = selectedShowtime.movieTitle;
+      document.getElementById('checkoutStudio').innerText = selectedShowtime.studioType;
+      document.getElementById('checkoutCinemaName').innerText = selectedShowtime.cinemaName;
+      document.getElementById('checkoutSeats').innerText = Array.from(selectedSeats.keys()).join(', ');
+
+      let ticketTotal = 0;
+      selectedSeats.forEach(p => ticketTotal += p);
+      document.getElementById('checkoutTicketAmount').innerText = 'Rp ' + ticketTotal.toLocaleString('id-ID');
+
+      renderCheckoutFnb();
+      updateCheckoutGrandTotal();
+      startHoldTimer(300); // 5 menit
+
+      document.getElementById('checkoutModal').classList.remove('hidden');
+    }
+
+    function renderCheckoutFnb() {
+      const container = document.getElementById('checkoutFnbContainer');
+      container.innerHTML = '';
+
+      foods.slice(0, 4).forEach(item => {
+        const qty = selectedFnb.get(item.id) || 0;
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-2 rounded-xl bg-slate-950 border border-slate-800 text-xs';
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <img src="${item.imageUrl}" class="w-8 h-8 rounded-lg object-cover">
+            <div>
+              <div class="font-bold text-slate-200">${item.name}</div>
+              <div class="text-[10px] text-amber-400 font-mono">Rp ${Number(item.price).toLocaleString('id-ID')}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="updateFnbQty(${item.id}, -1)" class="w-6 h-6 rounded bg-slate-800 text-slate-300 font-bold">-</button>
+            <span class="w-4 text-center font-bold font-mono">${qty}</span>
+            <button onclick="updateFnbQty(${item.id}, 1)" class="w-6 h-6 rounded bg-sky-600 text-white font-bold">+</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function updateFnbQty(foodId, delta) {
+      const current = selectedFnb.get(foodId) || 0;
+      const next = Math.max(0, current + delta);
+      if (next === 0) selectedFnb.delete(foodId);
+      else selectedFnb.set(foodId, next);
+
+      renderCheckoutFnb();
+      updateCheckoutGrandTotal();
+    }
+
+    function updateCheckoutGrandTotal() {
+      let ticketSum = 0;
+      selectedSeats.forEach(p => ticketSum += p);
+
+      let fnbSum = 0;
+      selectedFnb.forEach((qty, id) => {
+        const f = foods.find(x => x.id === id);
+        if (f) fnbSum += f.price * qty;
+      });
+
+      document.getElementById('fnbTotalLabel').innerText = '+ Rp ' + fnbSum.toLocaleString('id-ID');
+      const grandTotal = ticketSum + fnbSum;
+      document.getElementById('checkoutGrandTotal').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
+
+      const payMethod = document.querySelector('input[name="checkoutPayMethod"]:checked').value;
+      if (payMethod === 'QRIS') {
+        document.getElementById('checkoutPayAmountInput').value = grandTotal;
+      }
+    }
+
+    function toggleCheckoutPaymentInput() {
+      const method = document.querySelector('input[name="checkoutPayMethod"]:checked').value;
+      const input = document.getElementById('checkoutPayAmountInput');
+      const label = document.getElementById('checkoutPayAmountLabel');
+
+      if (method === 'QRIS') {
+        input.readOnly = true;
+        label.innerText = 'Nominal QRIS (Otomatis Pas)';
+        updateCheckoutGrandTotal();
+      } else {
+        input.readOnly = false;
+        input.value = '';
+        label.innerText = 'Uang Dibayarkan (Cash)';
+      }
+    }
+
+    function startHoldTimer(seconds) {
+      if (currentHoldTimerInterval) clearInterval(currentHoldTimerInterval);
+      let left = seconds;
+
+      currentHoldTimerInterval = setInterval(() => {
+        left--;
+        const m = String(Math.floor(left / 60)).padStart(2, '0');
+        const s = String(left % 60).padStart(2, '0');
+        document.getElementById('holdTimer').innerText = `${m}:${s}`;
+
+        if (left <= 0) {
+          clearInterval(currentHoldTimerInterval);
+          alert('Batas waktu pembayaran habis! Kursi telah dilepaskan kembali.');
+          closeCheckoutModal();
+        }
+      }, 1000);
+    }
+
+    function closeCheckoutModal() {
+      if (currentHoldTimerInterval) clearInterval(currentHoldTimerInterval);
+      document.getElementById('checkoutModal').classList.add('hidden');
+    }
+
+    // 9. Execute Payment & Issue Digital Ticket (with PIN Claim Code)
+    async function executePayment() {
+      const custName = document.getElementById('checkoutCustName').value.trim();
+      const payAmount = parseFloat(document.getElementById('checkoutPayAmountInput').value);
+      const payMethod = document.querySelector('input[name="checkoutPayMethod"]:checked').value;
+
+      if (!custName) {
+        alert('Nama pembeli wajib diisi!');
         return;
       }
       if (!payAmount || isNaN(payAmount)) {
@@ -347,15 +1102,21 @@
         return;
       }
 
+      const foodOrdersObj = {};
+      selectedFnb.forEach((qty, id) => foodOrdersObj[id] = qty);
+
       const payload = {
-        customerName: name,
-        seatCodes: seatCodes,
-        paymentAmount: payAmount,
-        paymentMethod: method
+        showtimeId: selectedShowtime.id,
+        customerName: custName,
+        customerEmail: 'randi@tixid.example.com',
+        seatCodes: Array.from(selectedSeats.keys()),
+        foodOrders: foodOrdersObj,
+        paymentMethod: payMethod,
+        paymentAmount: payAmount
       };
 
       try {
-        const res = await fetch('/api/bookings', {
+        const res = await fetch('/api/v2/bookings', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -363,37 +1124,234 @@
 
         const json = await res.json();
         if (json.success) {
-          showModal(json.data);
+          closeCheckoutModal();
+          currentClaimedTicket = json.data;
+          showTicketDetail(json.data);
+          fetchActiveBookings();
           selectedSeats.clear();
-          document.getElementById('custName').value = '';
-          document.getElementById('payAmount').value = '';
-          updateSummary();
-          fetchSeats();
+          selectedFnb.clear();
         } else {
-          alert('Gagal Memesan: ' + json.message);
+          alert('Gagal Transaksi: ' + json.message);
         }
-      } catch (err) {
+      } catch (e) {
         alert('Terjadi kesalahan menghubungi server.');
       }
     }
 
-    function showModal(data) {
-      document.getElementById('resCode').innerText = data.bookingCode;
-      document.getElementById('resName').innerText = data.customerName;
-      document.getElementById('resSeats').innerText = data.bookedSeats.join(', ');
-      document.getElementById('resMethod').innerText = data.paymentMethod;
-      document.getElementById('resTotal').innerText = 'Rp ' + Number(data.totalAmount).toLocaleString('id-ID');
-      document.getElementById('resPaid').innerText = 'Rp ' + Number(data.paymentAmount).toLocaleString('id-ID');
-      document.getElementById('resChange').innerText = 'Rp ' + Number(data.changeAmount).toLocaleString('id-ID');
-      document.getElementById('ticketModal').classList.remove('hidden');
+    // 10. Digital Ticket Modal with Random Claim Code (PIN: CLM-XXXXXX)
+    function showTicketDetail(ticket) {
+      currentClaimedTicket = ticket;
+      document.getElementById('ticketMovie').innerText = ticket.movieTitle;
+      document.getElementById('ticketCinema').innerText = `${ticket.cinemaName} • ${ticket.studioName}`;
+      document.getElementById('ticketTime').innerText = ticket.showDateTime;
+      document.getElementById('ticketSeats').innerText = ticket.seatCodesSummary;
+      document.getElementById('ticketFnb').innerText = ticket.foodSummary;
+      document.getElementById('ticketClaimCode').innerText = ticket.claimCode;
+      document.getElementById('ticketBarcodeText').innerText = ticket.bookingCode;
+      document.getElementById('ticketDetailModal').classList.remove('hidden');
     }
 
-    function closeModal() {
-      document.getElementById('ticketModal').classList.add('hidden');
+    function closeTicketDetailModal() {
+      document.getElementById('ticketDetailModal').classList.add('hidden');
     }
 
-    // Initial load
-    fetchSeats();
+    // 11. Render Active Tickets Tab (Screenshot 5)
+    function renderActiveTickets() {
+      const container = document.getElementById('activeTicketList');
+      container.innerHTML = '';
+
+      if (activeBookings.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 flex flex-col items-center">
+            <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 text-2xl mb-3">
+              <i class="fa-solid fa-ticket-simple"></i>
+            </div>
+            <h4 class="font-bold text-sm text-slate-200">Belum Ada Tiket Aktif</h4>
+            <p class="text-xs text-slate-400 mt-1 max-w-xs">Pesan tiket film favorit Anda sekarang untuk menikmati serunya menonton di bioskop!</p>
+            <button onclick="switchTab('home')" class="mt-4 px-5 py-2 rounded-xl bg-sky-500 text-slate-950 font-bold text-xs">Lihat Film</button>
+          </div>
+        `;
+        return;
+      }
+
+      activeBookings.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3 cursor-pointer hover:border-sky-500/50 transition';
+        card.onclick = () => showTicketDetail(t);
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <span class="text-[10px] font-mono text-slate-400">${t.bookingCode}</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${t.ticketClaimed ? 'bg-slate-800 text-slate-400' : 'bg-emerald-500/20 text-emerald-400'}">
+              ${t.ticketClaimed ? 'TIKET SUDAH DICETAK' : 'SIAP DITUKAR DI KIOSK'}
+            </span>
+          </div>
+          <div class="flex gap-3">
+            <img src="${t.moviePosterUrl || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=150&q=80'}" class="w-14 h-20 rounded-xl object-cover">
+            <div class="flex-1">
+              <h4 class="font-bold text-xs text-white">${t.movieTitle}</h4>
+              <p class="text-[11px] text-slate-400">${t.cinemaName}</p>
+              <p class="text-[10px] text-sky-400 mt-1 font-semibold">${t.showDateTime}</p>
+              <div class="flex justify-between items-center mt-2">
+                <span class="text-xs font-mono font-bold text-amber-400">Kursi: ${t.seatCodesSummary}</span>
+                <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded font-mono font-bold text-slate-300">PIN: ${t.claimCode}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 12. F&B Concessions Tab
+    function renderFoodTab() {
+      const container = document.getElementById('foodList');
+      container.innerHTML = '';
+
+      foods.forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-3 rounded-2xl bg-slate-900 border border-slate-800';
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <img src="${f.imageUrl}" class="w-16 h-16 rounded-xl object-cover shadow">
+            <div>
+              <span class="text-[9px] font-bold uppercase text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">${f.category}</span>
+              <h4 class="font-bold text-xs text-white mt-1">${f.name}</h4>
+              <p class="text-[10px] text-slate-400 line-clamp-1">${f.description}</p>
+              <span class="text-xs font-bold text-sky-400 font-mono mt-1 block">Rp ${Number(f.price).toLocaleString('id-ID')}</span>
+            </div>
+          </div>
+          <button onclick="alert('Item ${f.name} bisa ditambahkan saat Anda memilih kursi dan melakukan checkout tiket film!')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">
+            Pesan
+          </button>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // 13. Kiosk Simulator (Printing Ticket at Cinema Venue)
+    function openKioskModal() {
+      document.getElementById('kioskPrintResult').classList.add('hidden');
+      document.getElementById('kioskModal').classList.remove('hidden');
+    }
+
+    function openKioskWithCode() {
+      closeTicketDetailModal();
+      document.getElementById('kioskCodeInput').value = currentClaimedTicket.claimCode;
+      openKioskModal();
+    }
+
+    function closeKioskModal() {
+      document.getElementById('kioskModal').classList.add('hidden');
+    }
+
+    async function submitKioskClaim() {
+      const code = document.getElementById('kioskCodeInput').value.trim();
+      if (!code) {
+        alert('Masukkan PIN / Kode Klaim!');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/v2/bookings/claim-ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ claimCode: code })
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          const t = json.data;
+          document.getElementById('kioskPrintMovie').innerText = t.movieTitle.toUpperCase();
+          document.getElementById('kioskPrintStudio').innerText = t.studioName.toUpperCase();
+          document.getElementById('kioskPrintSeat').innerText = t.seatCodesSummary;
+          document.getElementById('kioskPrintTime').innerText = t.showDateTime;
+          document.getElementById('kioskPrintResult').classList.remove('hidden');
+          fetchActiveBookings();
+        } else {
+          alert('Gagal: ' + json.message);
+        }
+      } catch (e) {
+        alert('Terjadi kesalahan menghubungi mesin Kiosk.');
+      }
+    }
+
+    // 14. Navigation & City Filtering
+    function switchTab(tab) {
+      document.getElementById('tabHome').classList.add('hidden');
+      document.getElementById('tabCinemas').classList.add('hidden');
+      document.getElementById('tabTickets').classList.add('hidden');
+      document.getElementById('tabFoods').classList.add('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-sky-400');
+        btn.classList.add('text-slate-400');
+      });
+
+      if (tab === 'home') {
+        document.getElementById('tabHome').classList.remove('hidden');
+        document.getElementById('navHome').classList.add('text-sky-400');
+      } else if (tab === 'cinemas') {
+        document.getElementById('tabCinemas').classList.remove('hidden');
+        document.getElementById('navCinemas').classList.add('text-sky-400');
+        renderCinemaShowtimes();
+      } else if (tab === 'tickets') {
+        document.getElementById('tabTickets').classList.remove('hidden');
+        document.getElementById('navTickets').classList.add('text-sky-400');
+        fetchActiveBookings();
+      } else if (tab === 'foods') {
+        document.getElementById('tabFoods').classList.remove('hidden');
+        document.getElementById('navFoods').classList.add('text-sky-400');
+      }
+    }
+
+    function toggleCityDropdown() {
+      document.getElementById('cityDropdown').classList.toggle('hidden');
+    }
+
+    function selectCity(city) {
+      currentCity = city;
+      document.getElementById('selectedCityLabel').innerText = city;
+      document.getElementById('cinemaCityFilterLabel').innerText = city;
+      document.getElementById('cityDropdown').classList.add('hidden');
+      fetchCinemas();
+    }
+
+    function filterBrand(brand) {
+      currentBrand = brand;
+      document.querySelectorAll('.brand-tab').forEach(b => {
+        b.className = 'brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 whitespace-nowrap';
+      });
+      event.target.className = 'brand-tab px-3 py-1.5 rounded-full text-xs font-semibold bg-sky-500 text-slate-950 whitespace-nowrap';
+      
+      if (brand === 'ALL') {
+        renderNowShowing();
+      } else {
+        // filter display
+        renderNowShowing();
+      }
+    }
+
+    function handleSearch(query) {
+      if (!query.trim()) {
+        renderNowShowing();
+        return;
+      }
+      const filtered = movies.filter(m => m.title.toLowerCase().includes(query.toLowerCase()));
+      const container = document.getElementById('nowShowingList');
+      container.innerHTML = '';
+      filtered.forEach(movie => {
+        const card = document.createElement('div');
+        card.className = 'group cursor-pointer rounded-2xl bg-slate-900 border border-slate-800 hover:border-sky-500/50 p-2.5';
+        card.onclick = () => openMovieDetail(movie);
+        card.innerHTML = `<h3 class="font-bold text-xs text-white">${movie.title}</h3><p class="text-[10px] text-slate-400">${movie.genre}</p>`;
+        container.appendChild(card);
+      });
+    }
+
+    function openLoginModal() {
+      alert("Akun Terhubung: Randi Pratama (randi@tixid.example.com)\nSaldo TIX VIP Coins: 8.399 Coins (Aktif)");
+    }
   </script>
 </body>
 </html>
