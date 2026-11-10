@@ -237,3 +237,4 @@ window.selectDirectShowtime = (id, c, s, t, p) => MovieComponent.selectDirectSho
 window.proceedToSeatSelection = () => MovieComponent.proceedToSeatSelection();
 window.closeMovieDetail = () => MovieComponent.closeMovieDetail();
 window.watchTrailer = () => MovieComponent.watchTrailer();
+

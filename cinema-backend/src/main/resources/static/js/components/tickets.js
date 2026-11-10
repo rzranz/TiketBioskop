@@ -135,3 +135,4 @@ window.openKioskModal = () => TicketsComponent.openKioskModal();
 window.openKioskWithCode = () => TicketsComponent.openKioskWithCode();
 window.closeKioskModal = () => TicketsComponent.closeKioskModal();
 window.submitKioskClaim = () => TicketsComponent.submitKioskClaim();
+

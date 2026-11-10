@@ -305,3 +305,4 @@ window.submitNewCinema = () => AdminComponent.submitNewCinema();
 window.submitNewStudio = () => AdminComponent.submitNewStudio();
 window.submitNewShowtime = () => AdminComponent.submitNewShowtime();
 window.renderAdminSales = () => AdminComponent.renderAdminSales();
+

@@ -220,3 +220,4 @@ window.handleSearch = (q) => App.handleSearch(q);
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 });
+

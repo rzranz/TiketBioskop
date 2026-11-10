@@ -75,3 +75,4 @@ window.closeLoginModal = () => AuthComponent.closeLoginModal();
 window.switchLoginRole = (role) => AuthComponent.switchLoginRole(role);
 window.submitUserLogin = () => AuthComponent.submitUserLogin();
 window.submitAdminLogin = () => AuthComponent.submitAdminLogin();
+

@@ -42,3 +42,4 @@ const AppState = {
 
 // Global export for vanilla ES-friendly modules
 window.AppState = AppState;
+

@@ -321,3 +321,4 @@ window.toggleCheckoutPaymentInput = () => BookingComponent.toggleCheckoutPayment
 window.startHoldTimer = (sec) => BookingComponent.startHoldTimer(sec);
 window.closeCheckoutModal = () => BookingComponent.closeCheckoutModal();
 window.executePayment = () => BookingComponent.executePayment();
+

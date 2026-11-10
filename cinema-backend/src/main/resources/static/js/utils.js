@@ -73,3 +73,4 @@ window.Utils = Utils;
 window.showToast = Utils.showToast;
 window.formatRupiah = Utils.formatRupiah;
 window.handleImgError = Utils.handleImgError;
+
