@@ -1,0 +1,115 @@
+/* ==========================================================================
+   CineMax TIX - Cinema Ticketing Platform Stylesheet
+   Clean Code Design: Modular Presentation Layer
+   ========================================================================== */
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Curved Screen Projection in Auditorium */
+.screen-curve {
+  height: 35px;
+  border-top: 5px solid #0284c7;
+  border-radius: 50% 50% 0 0;
+  box-shadow: 0 -12px 28px rgba(2, 132, 199, 0.45);
+}
+
+/* Scrollbar utilities */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Pulse Glow & Halo Ring Animations */
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.06); opacity: 0.35; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+.pulse-ring {
+  animation: pulse-ring 2.2s infinite ease-in-out;
+}
+
+/* Thermal Paper Printing Animation (Self-Ticketing Kiosk) */
+@keyframes print-paper {
+  0% {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  100% {
+    max-height: 600px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.print-animation {
+  animation: print-paper 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Button Spring & Micro-Interactions */
+.btn-spring {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-spring:hover {
+  transform: translateY(-2px);
+}
+.btn-spring:active {
+  transform: scale(0.94);
+}
+
+/* Showtime Pill Button Interaction */
+.time-pill-btn {
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.time-pill-btn:hover {
+  transform: translateY(-2px);
+}
+.time-pill-btn:active {
+  transform: scale(0.92);
+}
+.time-pill-active {
+  background: #0284c7 !important;
+  color: #020617 !important;
+  border-color: #38bdf8 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45);
+  transform: scale(1.05);
+}
+
+/* Toast Notification Animation */
+@keyframes toast-slide {
+  0% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.toast-anim {
+  animation: toast-slide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Cinema & Studio Card Transitions */
+.cinema-card {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.cinema-card:hover {
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+/* Seat Map Animation */
+.seat-button {
+  transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.seat-button:active:not(:disabled) {
+  transform: scale(0.85);
+}
